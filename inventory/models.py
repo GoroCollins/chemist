@@ -217,7 +217,10 @@ class PurchaseHeader(models.Model):
         if not self.pk:
             self.created_by = user
         self.modified_by = user
-        super(PurchaseHeader, self).save(*args, **kwargs)
+        if PurchaseHeader.objects.filter(total=0):
+            print(f'An incomplete LPO exists, kindly fill the lines for {PurchaseHeader.objects.filter(total=0)[0]}')
+        else:
+            super(PurchaseHeader, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.number
