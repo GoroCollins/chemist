@@ -2,6 +2,8 @@ from django.db import models
 from phone_field import PhoneField
 from crum import get_current_user
 from django.db.models import Sum
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 ## Custom fieldtype
@@ -232,18 +234,29 @@ class PurchaseLine(models.Model):
     unit_price = models.PositiveIntegerField('Unit Price')
     total = models.IntegerField(editable=False)
     expiry_date = models.DateField('Expiry date')
-    quantity_received = models.PositiveBigIntegerField(default=0)
+    quantity_received = models.PositiveIntegerField(default=0)
     # @property
     # def lpo_total(self):
-    #     # PO line instance line = PurchaseLine.objects.filter(number__total=0)[0]
-    #     # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-    #     # PO number = line.number
+    #     #line = PurchaseLine.objects.filter(number__total=0)[0]
+    #     total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
+    #     return total_amount
     def save(self, *args, **kwargs):
         self.total = self.quantity_requested * self.unit_price
+        # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        # self.number.total = total_amount
+        # self.number.save()
         super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'Purchase Line For LPO:{self.number}'
+
+@receiver(post_save, sender=PurchaseLine)
+def update_lpo_total(sender, instance, created, **kwargs):
+    if created:
+        lpo_header = instance.number
+        total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        lpo_header.total = total_amount or 0
+        lpo_header.save()
 
 
 
