@@ -171,22 +171,6 @@ class Vendor(models.Model):
 #     def __str__(self) -> str:
 #         return self.number
     
-# class SalesHeader(models.Model):
-#     number = SalesInvoice(primary_key=True,editable=False)
-#     customer = models.CharField(max_length=200)
-#     date = models.DateField(auto_now=True)
-#     amount = models.IntegerField(editable=False)
-#     def __str__(self) -> str:
-#         return self.number
-
-# class SalesLines(models.Model):
-#     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
-#     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
-#     quantity = models.IntegerField()
-#     price = models.IntegerField()
-#     total = models.IntegerField()
-#     def __str__(self) -> str:
-#         return f'Sales Lines For {self.number}'
     
 # class Stock(models.Model):
 #     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='Item', related_query_name='Item')
@@ -197,8 +181,8 @@ class PurchaseHeader(models.Model):
     date = models.DateField(auto_now_add=True, editable=False)
     total = models.IntegerField(editable=False, default=0)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='Create', related_query_name='Create',editable=False)
-    modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='Modify', related_query_name='Modify',editable=False)
+    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
+    modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
     # @property
     # def total_price(self):
     #     "Returns total price."
@@ -251,14 +235,48 @@ class PurchaseLine(models.Model):
     def __str__(self) -> str:
         return f'Purchase Line For LPO:{self.number}'
 
-# @receiver(post_save, sender=PurchaseLine)
-# def update_lpo_total(sender, instance, created, **kwargs):
-#     if created:
-#         lpo_header = instance.number
-#         total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
-#         lpo_header.total = total_amount or 0
-#         lpo_header.save()
+@receiver(post_save, sender=PurchaseLine)
+def update_lpo_total(sender, instance, created, **kwargs):
+    if created:
+        lpo_header = instance.number
+        total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        lpo_header.total = total_amount or 0
+        lpo_header.save()
 
+class SalesHeader(models.Model):
+    number = SalesInvoice(primary_key=True,editable=False)
+    customer = models.CharField(max_length=200)
+    date = models.DateField(auto_now=True)
+    amount = models.IntegerField(editable=False)
+    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and not user.pk:
+            user = None
+        if not self.pk:
+            self.created_by = user
+        #self.modified_by = user
+        super(SalesHeader, self).save(*args, **kwargs)
+    def __str__(self) -> str:
+        return self.number
+
+# class SalesLines(models.Model):
+#     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
+#     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
+#     quantity = models.IntegerField()
+#     price = models.IntegerField()
+#     total = models.IntegerField()
+#     def __str__(self) -> str:
+#         return f'Sales Lines For {self.number}'
+
+class ItemEntry(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
+    quantity = models.IntegerField()
+    batch = models.CharField('Batch Number', max_length=200)
+    cost = models.IntegerField()
+    sale = models.IntegerField()
+    def __str__(self) -> str:
+        return f'Entry for Item {self.item}'
 
 
 
