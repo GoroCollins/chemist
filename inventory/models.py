@@ -4,6 +4,7 @@ from crum import get_current_user
 from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 
 
 ## Custom fieldtype
@@ -11,6 +12,7 @@ import re
 from django.db import models
 from django.utils import timezone
 
+# Custom fields
 class AlphanumericAutoField(models.CharField):
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = 15  # Maximum length of the alphanumeric value
@@ -212,17 +214,16 @@ class PurchaseHeader(models.Model):
     #     self.total = self.total_price
     #     super(LPO, self).save(*args, **kwargs)
     def save(self, *args, **kwargs):
-        #self.total = self.total_price
         user = get_current_user()
         if user and not user.pk:
             user = None
         if not self.pk:
             self.created_by = user
         self.modified_by = user
-        if PurchaseHeader.objects.filter(total=0):
-            print(f'An incomplete LPO exists, kindly fill the lines for {PurchaseHeader.objects.filter(total=0)[0]}')
-        else:
-            super(PurchaseHeader, self).save(*args, **kwargs)
+
+        # if PurchaseHeader.objects.filter(total=0).exists():
+        #     raise ValidationError("An incomplete LPO exists. Please fill the lines."
+        super(PurchaseHeader, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.number
@@ -243,20 +244,20 @@ class PurchaseLine(models.Model):
     def save(self, *args, **kwargs):
         self.total = self.quantity_requested * self.unit_price
         # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-        # self.number.total = total_amount
-        # self.number.save()
+        # self.number.total = total_amount or 0
+        self.number.save()
         super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'Purchase Line For LPO:{self.number}'
 
-@receiver(post_save, sender=PurchaseLine)
-def update_lpo_total(sender, instance, created, **kwargs):
-    if created:
-        lpo_header = instance.number
-        total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
-        lpo_header.total = total_amount or 0
-        lpo_header.save()
+# @receiver(post_save, sender=PurchaseLine)
+# def update_lpo_total(sender, instance, created, **kwargs):
+#     if created:
+#         lpo_header = instance.number
+#         total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
+#         lpo_header.total = total_amount or 0
+#         lpo_header.save()
 
 
 
