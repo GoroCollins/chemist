@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+import datetime
 
 
 ## Custom fieldtype
@@ -12,7 +13,6 @@ import re
 from django.db import models
 from django.utils import timezone
 
-# Custom fields
 class AlphanumericAutoField(models.CharField):
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = 15  # Maximum length of the alphanumeric value
@@ -138,43 +138,6 @@ class Vendor(models.Model):
     def __str__(self) -> str:
         return self.description
 
-# class PurchaseOrder(models.Model):
-#     number = AlphanumericAutoField(primary_key=True, editable=False)
-#     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='Vendors', related_query_name='vendor_code')
-#     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='Items', related_query_name='item_code')
-#     batch = models.CharField('Item Batch Number',max_length=200)
-#     quantity = models.PositiveIntegerField()
-#     unit_price = models.PositiveIntegerField('Unit Price')
-#     total = models.IntegerField(editable=False)
-#     expiry_date = models.DateField('Expiry date')
-#     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-#     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-#     created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='Create', related_query_name='Create',editable=False)
-#     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='Modify', related_query_name='Modify',editable=False)
-#     @property
-#     def total_price(self):
-#         "Returns total price."
-#         return self.quantity * self.unit_price
-#     # def save(self, *args, **kwargs):
-#     #     self.total = self.total_price
-#     #     super(LPO, self).save(*args, **kwargs)
-#     def save(self, *args, **kwargs):
-#         self.total = self.quantity * self.unit_price
-#         user = get_current_user()
-#         if user and not user.pk:
-#             user = None
-#         if not self.pk:
-#             self.created_by = user
-#         self.modified_by = user
-#         super(PurchaseOrder, self).save(*args, **kwargs)
-
-#     def __str__(self) -> str:
-#         return self.number
-    
-    
-# class Stock(models.Model):
-#     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='Item', related_query_name='Item')
-
 class PurchaseHeader(models.Model):
     number = AlphanumericAutoField(primary_key=True, editable=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='vendor', related_query_name='vendor')
@@ -220,11 +183,7 @@ class PurchaseLine(models.Model):
     total = models.IntegerField(editable=False)
     expiry_date = models.DateField('Expiry date')
     quantity_received = models.PositiveIntegerField(default=0)
-    # @property
-    # def lpo_total(self):
-    #     #line = PurchaseLine.objects.filter(number__total=0)[0]
-    #     total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-    #     return total_amount
+
     def save(self, *args, **kwargs):
         self.total = self.quantity_requested * self.unit_price
         # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
@@ -270,11 +229,21 @@ class SalesHeader(models.Model):
 #         return f'Sales Lines For {self.number}'
 
 class ItemEntry(models.Model):
+    document_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
-    quantity = models.IntegerField()
     batch = models.CharField('Batch Number', max_length=200)
+    quantity = models.IntegerField()
+    expiry_date = models.DateField('Expiry Date')
     cost = models.IntegerField()
     sale = models.IntegerField()
+    expiry_status = models.BooleanField(default=False)
+    @property
+    def is_expired(self):
+        '''Check expiry of items'''
+        if self.expiry_date <= datetime.date.today():
+            return 1
+        else:
+            return 0
     def __str__(self) -> str:
         return f'Entry for Item {self.item}'
 
