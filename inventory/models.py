@@ -146,20 +146,7 @@ class PurchaseHeader(models.Model):
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
-    # @property
-    # def total_price(self):
-    #     "Returns total price."
-    #     lpo_total = 0
-    #     lpos = PurchaseHeader.objects.filter(total=0)
-    #     lpo_number = lpos.number
-    #     line_totals = lpo_number.Header.all()
-    #     for line in line_totals:
-    #         line_total = line.total
-    #         lpo_total += line_total
-    #     return lpo_total
-    # def save(self, *args, **kwargs):
-    #     self.total = self.total_price
-    #     super(LPO, self).save(*args, **kwargs)
+
     def save(self, *args, **kwargs):
         user = get_current_user()
         if user and not user.pk:
@@ -188,7 +175,7 @@ class PurchaseLine(models.Model):
         self.total = self.quantity_requested * self.unit_price
         # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
         # self.number.total = total_amount or 0
-        self.number.save()
+        #self.number.save()
         super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -201,6 +188,31 @@ def update_lpo_total(sender, instance, created, **kwargs):
         total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
         lpo_header.total = total_amount or 0
         lpo_header.save()
+
+class ItemEntry(models.Model):
+    document_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry')
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
+    batch = models.CharField('Batch Number', max_length=200)
+    quantity = models.IntegerField()
+    expiry_date = models.DateField('Expiry Date')
+    cost = models.IntegerField()
+    sale = models.IntegerField()
+    expiry_status = models.BooleanField(default=False)
+    @property
+    def is_expired(self):
+        '''Check expiry of items'''
+        if self.expiry_date <= datetime.date.today():
+            return 1
+        else:
+            return 0
+    def save(self, *args, **kwargs):
+        self.expiry_status = self.is_expired
+        self.sale = self.cost * 1.4
+        assert self.sale - self.cost > 0, f'Selling price must be higher than buying price'
+        #entry = 
+        super(ItemEntry, self).save(*args, **kwargs)
+    def __str__(self) -> str:
+        return f'Entry for Item {self.item}'
 
 class SalesHeader(models.Model):
     number = SalesInvoice(primary_key=True,editable=False)
@@ -219,33 +231,30 @@ class SalesHeader(models.Model):
     def __str__(self) -> str:
         return self.number
 
-# class SalesLines(models.Model):
-#     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
-#     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
-#     quantity = models.IntegerField()
-#     price = models.IntegerField()
-#     total = models.IntegerField()
-#     def __str__(self) -> str:
-#         return f'Sales Lines For {self.number}'
-
-class ItemEntry(models.Model):
-    document_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry')
-    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
-    batch = models.CharField('Batch Number', max_length=200)
+class SalesLines(models.Model):
+    number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
     quantity = models.IntegerField()
-    expiry_date = models.DateField('Expiry Date')
-    cost = models.IntegerField()
-    sale = models.IntegerField()
-    expiry_status = models.BooleanField(default=False)
-    @property
-    def is_expired(self):
-        '''Check expiry of items'''
-        if self.expiry_date <= datetime.date.today():
-            return 1
-        else:
-            return 0
+    lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales', editable=False)
+    unit_price = models.IntegerField()
+    total = models.FloatField()
+    discount = models.IntegerField('Percentage Discount', default=0)
+
+    def save(self, *args, **kwargs):
+        self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
+        # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        # self.number.total = total_amount or 0
+        #self.number.save()
+        super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
-        return f'Entry for Item {self.item}'
+        return f'Sales Lines For {self.number}'
+@receiver(post_save, sender=SalesLines)
+def update_invoice_total(sender, instance, created, **kwargs):
+    if created:
+        sales_header = instance.number
+        total_amount = sales_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        sales_header.amount = total_amount or 0
+        sales_header.save()
 
 
 
