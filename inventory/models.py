@@ -173,7 +173,19 @@ class PurchaseLine(models.Model):
 
     def save(self, *args, **kwargs):
         self.total = self.quantity_requested * self.unit_price
-        assert self.quantity_received <= self.quantity_requested, 'You cannot receive more than requested'
+        if self.quantity_received <= self.quantity_requested:
+            raise ValidationError('You cannot receive more than requested')
+        # Save values to corresponding fields in ItemEntry
+        item_entry = ItemEntry.objects.create(
+            item = self.item,
+            batch=self.batch,
+            quantity=self.quantity_received,
+            expiry_date=self.expiry_date,
+            cost=self.unit_price
+        )
+
+        # Assign the created ItemEntry instance to the foreign key field
+        self.number = item_entry
         # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
         # self.number.total = total_amount or 0
         #self.number.save()
@@ -202,14 +214,12 @@ class ItemEntry(models.Model):
     @property
     def is_expired(self):
         '''Check expiry of items'''
-        if self.expiry_date <= datetime.date.today():
-            return 1
-        else:
-            return 0
+        return self.expiry_date <= datetime.date.today()
     def save(self, *args, **kwargs):
         self.expiry_status = self.is_expired
         self.sale = self.cost * 1.4
-        assert self.sales > self.cost, f'Selling price must be higher than buying price'
+        if self.sale <= self.cost:
+            raise ValidationError('Selling price must be higher than the buying prce')
         #entry = 
         super(ItemEntry, self).save(*args, **kwargs)
     def __str__(self) -> str:
