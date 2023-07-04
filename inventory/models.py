@@ -200,7 +200,7 @@ class PurchaseLine(models.Model):
             )
 
             # Assign the created ItemEntry instance to the foreign key field
-            self.number = item_entry
+            #self.number = item_entry
 
             # calculate the total value of PurchaseLine
             self.total = self.quantity_requested * self.unit_price
