@@ -100,7 +100,7 @@ class VendorCode(models.CharField):
                 # Extract the prefix, year, and number components from the latest value
                 match = re.match(r'V-(\d+)', latest_value)
                 if match:
-                    number = match.group(2)
+                    number = match.group(1)
                     new_number = int(number) + 1
                     new_value = f'V-{new_number:05d}'
                 else:
@@ -172,27 +172,62 @@ class PurchaseLine(models.Model):
     quantity_received = models.PositiveIntegerField(default=0)
 
     def save(self, *args, **kwargs):
-        self.total = self.quantity_requested * self.unit_price
-        if self.quantity_received <= self.quantity_requested:
-            raise ValidationError('You cannot receive more than requested')
-        # Save values to corresponding fields in ItemEntry
-        item_entry = ItemEntry.objects.create(
-            item = self.item,
-            batch=self.batch,
-            quantity=self.quantity_received,
-            expiry_date=self.expiry_date,
-            cost=self.unit_price
-        )
+        if self.pk:
+            # Update existing instance
+            if self.quantity_received > self.quantity_requested:
+                raise ValidationError('You cannot receive more than requested') # move to view or form
+            # Update values of corresponding fields in ItemEntry
+            item_entry = self.number.item_entry
+            item_entry.batch = self.batch
+            item_entry.quantity = self.quantity_received
+            item_entry.expiry_date = self.expiry_date
+            item_entry.cost = self.unit_price
+            item_entry.save()
+            
+            # Update the total value of the PurchaseLine
+            self.total = self.quantity_requested * self.unit_price
+        else:
+            # Create a new instance
+            if self.quantity_received <= self.quantity_requested:
+                raise ValidationError('You cannot receive more than requested')
+            # Create a new insance of ItemENtry
+            item_entry = ItemEntry.objects.create(
+                item=self.item,
+                batch=self.batch,
+                quantity=self.quantity_received,
+                expiry_date=self.expiry_date,
+                cost=self.unit_price
+            )
 
-        # Assign the created ItemEntry instance to the foreign key field
-        self.number = item_entry
-        # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-        # self.number.total = total_amount or 0
-        #self.number.save()
+            # Assign the created ItemEntry instance to the foreign key field
+            self.number = item_entry
+
+            # calculate the total value of PurchaseLine
+            self.total = self.quantity_requested * self.unit_price
         super(PurchaseLine, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.total = self.quantity_requested * self.unit_price
+    #     if self.quantity_received <= self.quantity_requested:
+    #         raise ValidationError('You cannot receive more than requested')
+    #     # Save values to corresponding fields in ItemEntry
+    #     item_entry = ItemEntry.objects.create(
+    #         item = self.item,
+    #         batch=self.batch,
+    #         quantity=self.quantity_received,
+    #         expiry_date=self.expiry_date,
+    #         cost=self.unit_price
+    #     )
 
-    def __str__(self) -> str:
-        return f'Purchase Line For LPO:{self.number}'
+    #     # Assign the created ItemEntry instance to the foreign key field
+    #     self.number = item_entry
+    #     # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
+    #     # self.number.total = total_amount or 0
+    #     #self.number.save()
+    #     super(PurchaseLine, self).save(*args, **kwargs)
+
+    # def __str__(self) -> str:
+    #     return f'Purchase Line For LPO:{self.number}'
+
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
