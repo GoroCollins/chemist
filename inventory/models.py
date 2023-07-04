@@ -188,8 +188,8 @@ class PurchaseLine(models.Model):
             self.total = self.quantity_requested * self.unit_price
         else:
             # Create a new instance
-            if self.quantity_received <= self.quantity_requested:
-                raise ValidationError('You cannot receive more than requested')
+            # if self.quantity_received <= self.quantity_requested:
+            #     raise ValidationError('You cannot receive more than requested')
             # Create a new insance of ItemENtry
             item_entry = ItemEntry.objects.create(
                 item=self.item,
