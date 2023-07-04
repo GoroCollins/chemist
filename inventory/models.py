@@ -238,7 +238,8 @@ def update_lpo_total(sender, instance, created, **kwargs):
         lpo_header.save()
 
 class ItemEntry(models.Model):
-    document_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry')
+    purchase_doc_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry', null=True, verbose_name='Purchase Document Number')
+    sales_doc_no = models.ForeignKey("SalesLines", on_delete=models.PROTECT, related_name='items_entry', related_query_name='items_entry', null=True,verbose_name='Sales Document Number')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
     batch = models.CharField('Batch Number', max_length=200)
     quantity = models.IntegerField()
