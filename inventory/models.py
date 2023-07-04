@@ -173,6 +173,7 @@ class PurchaseLine(models.Model):
 
     def save(self, *args, **kwargs):
         self.total = self.quantity_requested * self.unit_price
+        assert self.quantity_received <= self.quantity_requested, 'You cannot receive more than requested'
         # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
         # self.number.total = total_amount or 0
         #self.number.save()
@@ -208,7 +209,7 @@ class ItemEntry(models.Model):
     def save(self, *args, **kwargs):
         self.expiry_status = self.is_expired
         self.sale = self.cost * 1.4
-        assert self.sale - self.cost > 0, f'Selling price must be higher than buying price'
+        assert self.sales > self.cost, f'Selling price must be higher than buying price'
         #entry = 
         super(ItemEntry, self).save(*args, **kwargs)
     def __str__(self) -> str:
@@ -242,9 +243,10 @@ class SalesLines(models.Model):
 
     def save(self, *args, **kwargs):
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
-        # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-        # self.number.total = total_amount or 0
-        #self.number.save()
+        if not self.unit_price:
+            item_entry = self.lpo
+            if item_entry:
+                self.unit_price = item_entry.sale
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return f'Sales Lines For {self.number}'
