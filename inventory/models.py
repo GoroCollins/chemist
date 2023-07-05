@@ -223,7 +223,6 @@ def update_lpo_total(sender, instance, created, **kwargs):
 class ItemEntry(models.Model):
     entry_date = models.DateField(auto_now_add=True, editable=False)
     purchase_doc_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry', null=True, verbose_name='Purchase Document Number')
-    sales_doc_no = models.ForeignKey("SalesLines", on_delete=models.PROTECT, related_name='items_entry', related_query_name='items_entry', null=True,verbose_name='Sales Document Number')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
     batch = models.CharField('Batch Number', max_length=200)
     quantity = models.IntegerField()
@@ -239,8 +238,6 @@ class ItemEntry(models.Model):
     def get_source_code(self):
         if self.purchase_doc_no:
             return 'PURCHASES'
-        elif self.sales_doc_no:
-            return 'SALES'
         else:
             return 'RETURNS'
     def save(self, *args, **kwargs):
@@ -276,6 +273,7 @@ class SalesHeader(models.Model):
 class SalesLines(models.Model):
     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
+    batch = models.CharField(max_length=100)
     quantity = models.IntegerField()
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales', editable=False)
     unit_price = models.IntegerField()
@@ -287,6 +285,7 @@ class SalesLines(models.Model):
             item_entry = self.lpo
             if item_entry:
                 self.unit_price = item_entry.sale
+                self.batch = item_entry.batch
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
@@ -299,19 +298,7 @@ def update_invoice_total(sender, instance, created, **kwargs):
         sales_header.amount = total_amount or 0
         sales_header.save()
 
-
-    # def save(self, *args, **kwargs):
-    #         super(SalesLines, self).save(*args, **kwargs)
-
-    #         # Create a new instance of ItemEntry
-    #         item_entry = ItemEntry.objects.create(
-    #             sale_doc_no=self,
-    #             item=self.item,
-    #             batch=self.batch,
-    #             quantity=self.quantity_received,
-    #             expiry_date=self.expiry_date,
-    #             cost=self.unit_price
-    #         )
+# Create conssolidated item entries
 
 
 
