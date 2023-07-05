@@ -178,7 +178,7 @@ class PurchaseLine(models.Model):
                 raise ValidationError('You cannot receive more than requested')
 
             # Update values of corresponding fields in ItemEntry
-            item_entry = self.number.item_entry
+            item_entry = self.item_entry
             item_entry.batch = self.batch
             item_entry.quantity = self.quantity_received
             item_entry.expiry_date = self.expiry_date
@@ -210,7 +210,7 @@ class PurchaseLine(models.Model):
         super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return self.number
+        return f'{self.number}'
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
