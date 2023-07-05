@@ -192,6 +192,7 @@ class PurchaseLine(models.Model):
             #     raise ValidationError('You cannot receive more than requested')
             # Create a new insance of ItemENtry
             item_entry = ItemEntry.objects.create(
+                purchase_doc_no=self.number,
                 item=self.item,
                 batch=self.batch,
                 quantity=self.quantity_received,
@@ -225,8 +226,8 @@ class PurchaseLine(models.Model):
     #     #self.number.save()
     #     super(PurchaseLine, self).save(*args, **kwargs)
 
-    # def __str__(self) -> str:
-    #     return f'Purchase Line For LPO:{self.number}'
+    def __str__(self) -> str:
+        return f'Purchase Line For LPO:{self.number}'
 
 
 @receiver(post_save, sender=PurchaseLine)
@@ -247,13 +248,22 @@ class ItemEntry(models.Model):
     cost = models.IntegerField()
     sale = models.IntegerField()
     expiry_status = models.BooleanField(default=False)
+    source_code = models.CharField(max_length=100)
     @property
     def is_expired(self):
         '''Check expiry of items'''
         return self.expiry_date <= datetime.date.today()
+    def source_code(self):
+        if self.purchase_doc_no:
+            return 'PURCHASES'
+        elif self.sales_doc_no:
+            return 'SALES'
+        else:
+            return 'RETURNS'
     def save(self, *args, **kwargs):
         self.expiry_status = self.is_expired
         self.sale = self.cost * 1.4
+        self.source_code = self.source_code()
         if self.sale <= self.cost:
             raise ValidationError('Selling price must be higher than the buying prce')
         #entry = 
