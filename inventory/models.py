@@ -210,7 +210,7 @@ class PurchaseLine(models.Model):
         super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f'Purchase Line For LPO: {self.number}'
+        return self.number
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
