@@ -175,7 +175,8 @@ class PurchaseLine(models.Model):
         if self.pk:
             # Update existing instance
             if self.quantity_received > self.quantity_requested:
-                raise ValidationError('You cannot receive more than requested') # move to view or form
+                raise ValidationError('You cannot receive more than requested')
+
             # Update values of corresponding fields in ItemEntry
             item_entry = self.number.item_entry
             item_entry.batch = self.batch
@@ -183,16 +184,16 @@ class PurchaseLine(models.Model):
             item_entry.expiry_date = self.expiry_date
             item_entry.cost = self.unit_price
             item_entry.save()
-            
+
+        else:
             # Update the total value of the PurchaseLine
             self.total = self.quantity_requested * self.unit_price
-        else:
-            # Create a new instance
-            # if self.quantity_received <= self.quantity_requested:
-            #     raise ValidationError('You cannot receive more than requested')
-            # Create a new insance of ItemENtry
+            # Create a new instance of PurchaseLine
+            super(PurchaseLine, self).save(*args, **kwargs)
+
+            # Create a new instance of ItemEntry
             item_entry = ItemEntry.objects.create(
-                purchase_doc_no=self.number,
+                purchase_doc_no=self,
                 item=self.item,
                 batch=self.batch,
                 quantity=self.quantity_received,
@@ -203,32 +204,13 @@ class PurchaseLine(models.Model):
             # Assign the created ItemEntry instance to the foreign key field
             #self.number = item_entry
 
-            # calculate the total value of PurchaseLine
+            # Calculate the total value of PurchaseLine
             self.total = self.quantity_requested * self.unit_price
-        super(PurchaseLine, self).save(*args, **kwargs)
-    # def save(self, *args, **kwargs):
-    #     self.total = self.quantity_requested * self.unit_price
-    #     if self.quantity_received <= self.quantity_requested:
-    #         raise ValidationError('You cannot receive more than requested')
-    #     # Save values to corresponding fields in ItemEntry
-    #     item_entry = ItemEntry.objects.create(
-    #         item = self.item,
-    #         batch=self.batch,
-    #         quantity=self.quantity_received,
-    #         expiry_date=self.expiry_date,
-    #         cost=self.unit_price
-    #     )
 
-    #     # Assign the created ItemEntry instance to the foreign key field
-    #     self.number = item_entry
-    #     # total_amount = PurchaseLine.objects.filter(number__total=0).aggregate(total=Sum('total'))['total']
-    #     # self.number.total = total_amount or 0
-    #     #self.number.save()
-    #     super(PurchaseLine, self).save(*args, **kwargs)
+        super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f'Purchase Line For LPO:{self.number}'
-
+        return f'Purchase Line For LPO: {self.number}'
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
@@ -239,6 +221,7 @@ def update_lpo_total(sender, instance, created, **kwargs):
         lpo_header.save()
 
 class ItemEntry(models.Model):
+    entry_date = models.DateField(auto_now_add=True, editable=False)
     purchase_doc_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry', null=True, verbose_name='Purchase Document Number')
     sales_doc_no = models.ForeignKey("SalesLines", on_delete=models.PROTECT, related_name='items_entry', related_query_name='items_entry', null=True,verbose_name='Sales Document Number')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
@@ -269,7 +252,9 @@ class ItemEntry(models.Model):
         #entry = 
         super(ItemEntry, self).save(*args, **kwargs)
     def __str__(self) -> str:
-        return f'Entry for Item {self.item}'
+        return f'Entry for {self.item}'
+    class Meta:
+        verbose_name_plural = 'Item Entries'
 
 class SalesHeader(models.Model):
     number = SalesInvoice(primary_key=True,editable=False)
@@ -298,11 +283,11 @@ class SalesLines(models.Model):
     discount = models.IntegerField('Percentage Discount', default=0)
 
     def save(self, *args, **kwargs):
-        self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         if not self.unit_price:
             item_entry = self.lpo
             if item_entry:
                 self.unit_price = item_entry.sale
+        self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return f'Sales Lines For {self.number}'
@@ -315,7 +300,18 @@ def update_invoice_total(sender, instance, created, **kwargs):
         sales_header.save()
 
 
+    # def save(self, *args, **kwargs):
+    #         super(SalesLines, self).save(*args, **kwargs)
 
+    #         # Create a new instance of ItemEntry
+    #         item_entry = ItemEntry.objects.create(
+    #             sale_doc_no=self,
+    #             item=self.item,
+    #             batch=self.batch,
+    #             quantity=self.quantity_received,
+    #             expiry_date=self.expiry_date,
+    #             cost=self.unit_price
+    #         )
 
 
 
