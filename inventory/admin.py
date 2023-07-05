@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine
+from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry
 
 class UnitAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["code"]}), ('Unit information', {"fields": ["description"]}),]
@@ -10,6 +10,7 @@ class UnitAdmin(admin.ModelAdmin):
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Item)
 admin.site.register(Vendor)
+admin.site.register(ItemEntry)
 
 class LineInline(admin.StackedInline):
     model = PurchaseLine

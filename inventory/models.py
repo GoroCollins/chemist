@@ -253,7 +253,7 @@ class ItemEntry(models.Model):
     def is_expired(self):
         '''Check expiry of items'''
         return self.expiry_date <= datetime.date.today()
-    def source_code(self):
+    def get_source_code(self):
         if self.purchase_doc_no:
             return 'PURCHASES'
         elif self.sales_doc_no:
@@ -263,7 +263,7 @@ class ItemEntry(models.Model):
     def save(self, *args, **kwargs):
         self.expiry_status = self.is_expired
         self.sale = self.cost * 1.4
-        self.source_code = self.source_code()
+        self.source_code = self.get_source_code()
         if self.sale <= self.cost:
             raise ValidationError('Selling price must be higher than the buying prce')
         #entry = 
