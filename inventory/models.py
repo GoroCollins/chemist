@@ -181,7 +181,7 @@ class PurchaseLine(models.Model):
                 raise ValidationError('Enter vendor invoice number')
 
             # Update values of corresponding fields in ItemEntry
-            item_entry = self.item_entry
+            item_entry = self.item_entry.first()
             item_entry.batch = self.batch
             item_entry.quantity = self.quantity_received
             item_entry.expiry_date = self.expiry_date
