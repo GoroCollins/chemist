@@ -289,6 +289,7 @@ class SalesLines(models.Model):
             if item_entry:
                 self.unit_price = item_entry.sale
                 self.batch = item_entry.batch
+                item_entry.quantity -= self.quantity
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
