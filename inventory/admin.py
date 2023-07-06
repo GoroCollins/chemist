@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry
+from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry, SalesHeader, SalesLines
 
 class UnitAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["code"]}), ('Unit information', {"fields": ["description"]}),]
@@ -26,3 +26,4 @@ class PurchaseHeaderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(PurchaseHeader, PurchaseHeaderAdmin)
+
