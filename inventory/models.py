@@ -120,6 +120,8 @@ class Unit(models.Model):
     description = models.CharField(max_length=200)
     def __str__(self) -> str:
         return self.description
+    class Meta:
+        verbose_name_plural ='Units Of Measure'
 
 class Item(models.Model):
     code = models.CharField('Item Code', max_length=20, primary_key=True)
@@ -127,6 +129,8 @@ class Item(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='Items', related_query_name='Items')
     def __str__(self) -> str:
         return self.description
+    class Meta:
+        verbose_name_plural = 'Items List'
 
 class Vendor(models.Model):
     code = VendorCode('Vendor Code',primary_key=True, editable=False)
@@ -137,6 +141,8 @@ class Vendor(models.Model):
     kra_pin = models.CharField(max_length=30)
     def __str__(self) -> str:
         return self.description
+    class Meta:
+        verbose_name = 'Vendors List'
 
 class PurchaseHeader(models.Model):
     number = AlphanumericAutoField(primary_key=True, editable=False)
@@ -161,6 +167,8 @@ class PurchaseHeader(models.Model):
 
     def __str__(self) -> str:
         return self.number
+    class Meta:
+        verbose_name_plural = 'Purchase Orders'
 class PurchaseLine(models.Model):
     number = models.ForeignKey(PurchaseHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo')
@@ -272,6 +280,8 @@ class SalesHeader(models.Model):
         super(SalesHeader, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return self.number
+    class Meta:
+        verbose_name_plural = 'Sales Invoices'
 
 class SalesLines(models.Model):
     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
