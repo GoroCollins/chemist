@@ -170,12 +170,15 @@ class PurchaseLine(models.Model):
     total = models.IntegerField(editable=False)
     expiry_date = models.DateField('Expiry date')
     quantity_received = models.PositiveIntegerField(default=0)
+    invoice_no = models.CharField('Vendor Invoice Number',max_length=100, null=True)
 
     def save(self, *args, **kwargs):
         if self.pk:
             # Update existing instance
             if self.quantity_received > self.quantity_requested:
                 raise ValidationError('You cannot receive more than requested')
+            if not self.invoice_no:
+                raise ValidationError('Enter vendor invoice number')
 
             # Update values of corresponding fields in ItemEntry
             item_entry = self.item_entry
