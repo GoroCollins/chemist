@@ -130,7 +130,7 @@ class Item(models.Model):
     def __str__(self) -> str:
         return self.description
     class Meta:
-        verbose_name_plural = 'Items List'
+        verbose_name_plural = 'Items'
 
 class Vendor(models.Model):
     code = VendorCode('Vendor Code',primary_key=True, editable=False)
@@ -142,7 +142,7 @@ class Vendor(models.Model):
     def __str__(self) -> str:
         return self.description
     class Meta:
-        verbose_name = 'Vendors List'
+        verbose_name_plural = 'Vendors'
 
 class PurchaseHeader(models.Model):
     number = AlphanumericAutoField(primary_key=True, editable=False)
