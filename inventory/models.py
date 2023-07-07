@@ -306,9 +306,9 @@ class SalesLines(models.Model):
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
-        return f'Sales Lines For {self.number}'
-    # def get_form(self, **kwargs):
-    #     return SalesLinesForm(**kwargs)
+        return f'{self.number}'
+    def get_form(self, **kwargs):
+        return SalesLinesForm(**kwargs)
 @receiver(post_save, sender=SalesLines)
 def update_invoice_total(sender, instance, created, **kwargs):
     if created:
@@ -319,17 +319,17 @@ def update_invoice_total(sender, instance, created, **kwargs):
 
 # from django import forms
 
-# class SalesLinesForm(forms.ModelForm):
-#     class Meta:
-#         model = SalesLines
-#         fields = '__all__'
+class SalesLinesForm(forms.ModelForm):
+    class Meta:
+        model = SalesLines
+        fields = '__all__'
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         item = self.instance.item
-#         item_entries = ItemEntry.objects.filter(item=item)
-#         batch_choices = [(entry.batch, entry.batch) for entry in item_entries]
-#         self.fields['batch'] = forms.ChoiceField(choices=batch_choices)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        item = self.instance.item
+        item_entries = ItemEntry.objects.filter(item=item)
+        batch_choices = [(entry.batch, entry.batch) for entry in item_entries]
+        self.fields['batch'] = forms.ChoiceField(choices=batch_choices)
 
 
 # sales_header.lines.filter(number__total=0)
