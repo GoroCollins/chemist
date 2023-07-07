@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import datetime
-
+from django import forms
 
 ## Custom fieldtype
 import re
@@ -283,14 +283,16 @@ class SalesHeader(models.Model):
     class Meta:
         verbose_name_plural = 'Sales Invoices'
 
+
+
 class SalesLines(models.Model):
     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
     batch = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales', editable=False)
-    unit_price = models.IntegerField()
-    total = models.FloatField()
+    unit_price = models.IntegerField(editable=False)
+    total = models.FloatField(editable=False)
     discount = models.IntegerField('Percentage Discount', default=0)
 
     def save(self, *args, **kwargs):
@@ -298,21 +300,38 @@ class SalesLines(models.Model):
             item_entry = self.lpo
             if item_entry:
                 self.unit_price = item_entry.sale
-                self.batch = item_entry.batch
+                #self.batch = item_entry.batch
                 item_entry.quantity -= self.quantity
+                item_entry.save()
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return f'Sales Lines For {self.number}'
+    # def get_form(self, **kwargs):
+    #     return SalesLinesForm(**kwargs)
 @receiver(post_save, sender=SalesLines)
 def update_invoice_total(sender, instance, created, **kwargs):
     if created:
         sales_header = instance.number
-        total_amount = sales_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
+        total_amount = SalesLines.objects.filter(number=sales_header, total=0).aggregate(total=Sum('total'))['total']
         sales_header.amount = total_amount or 0
         sales_header.save()
 
+# from django import forms
+
+# class SalesLinesForm(forms.ModelForm):
+#     class Meta:
+#         model = SalesLines
+#         fields = '__all__'
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         item = self.instance.item
+#         item_entries = ItemEntry.objects.filter(item=item)
+#         batch_choices = [(entry.batch, entry.batch) for entry in item_entries]
+#         self.fields['batch'] = forms.ChoiceField(choices=batch_choices)
 
 
+# sales_header.lines.filter(number__total=0)
 
 
