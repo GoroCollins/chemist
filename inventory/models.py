@@ -312,7 +312,6 @@ def update_invoice_total(sender, instance, created, **kwargs):
         sales_header.amount = total_amount or 0
         sales_header.save()
 
-# Create conssolidated item entries
 
 
 

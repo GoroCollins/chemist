@@ -1,0 +1,2 @@
+1. Implement returns thorugh view or model forms.
+2. Create consolidated item entries capturing purchases, sales, and returns through a view.
