@@ -260,7 +260,7 @@ class ItemEntry(models.Model):
         #entry = 
         super(ItemEntry, self).save(*args, **kwargs)
     def __str__(self) -> str:
-        return f'Entry for {self.item}'
+        return f'Item:{self.item} Batch:{self.batch}'
     class Meta:
         verbose_name_plural = 'Item Entries'
 
