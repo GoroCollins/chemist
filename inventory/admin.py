@@ -61,26 +61,50 @@ admin.site.register(Vendor, VendorAdmin)
 
 
 
-class SalesLinesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Retrieve all batches associated with the selected item
-        item = self.item
-        batches = ItemEntry.objects.filter(item=item).values_list('batch', flat=True).distinct()
-        # Set choices for the batch field
-        self.fields['batch'].choices = [(batch, batch) for batch in batches]
+# class SalesLinesForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         # Retrieve all batches associated with the selected item
+#         item = self.item
+#         batches = ItemEntry.objects.filter(item=item).values_list('batch', flat=True).distinct()
+#         # Set choices for the batch field
+#         self.fields['batch'].choices = [(batch, batch) for batch in batches]
 
-    class Meta:
-        model = SalesLines
-        fields = '__all__'
+#     class Meta:
+#         model = SalesLines
+#         fields = '__all__'
 # class SalesLinesAdmin(admin.ModelAdmin):
 #     form = SalesLinesForm
 
 # admin.site.register(SalesLines, SalesLinesAdmin)
+class SalesLinesForm(forms.ModelForm):
+    lpo = forms.ModelChoiceField(queryset=ItemEntry.objects.all(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.lpo:
+            self.fields['lpo'].initial = self.instance.lpo
+        # Retrieve all batches associated with the selected item
+        # item = self.item
+        # batches = ItemEntry.objects.filter(item=item).values_list('batch', flat=True).distinct()
+        # # Set choices for the batch field
+        # self.fields['batch'].choices = [(batch, batch) for batch in batches]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        lpo = cleaned_data.get('lpo')
+        if lpo:
+            cleaned_data['unit_price'] = lpo.sale
+        return cleaned_data
+
+    class Meta:
+        model = SalesLines
+        fields = '__all__'
+
 class SalesInline(admin.StackedInline):
     model = SalesLines
     extra = 1
-    #form = SalesLinesForm
+    form = SalesLinesForm
 @admin.register(SalesHeader)
 class SalesHeaderAdmin(admin.ModelAdmin):
     fieldsets = [
