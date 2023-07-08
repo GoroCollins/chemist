@@ -300,7 +300,10 @@ class SalesLines(models.Model):
                 self.unit_price = item_entry.sale
                 self.batch = item_entry.batch
                 item_entry.quantity -= self.quantity
-                item_entry.save()
+                if item_entry.quantity < 0:
+                    raise ValidationError(f'{self.item} is out of stock')
+                else:
+                    item_entry.save()
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
         super(SalesLines, self).save(*args, **kwargs)
     def __str__(self) -> str:
