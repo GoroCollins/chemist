@@ -1,4 +1,4 @@
-1. Implement returns thorugh view or model forms.
+1. Implement returns through view or model forms.
 2. Create consolidated item entries capturing purchases, sales, and returns through a view.
 3. Add sales invoice finalize option on the front end.
 Implementation of views:
@@ -18,7 +18,8 @@ Implementation of views:
        - on this view give option to create sales invoice
        - allow editing for open invoices and only viewing and printing for finalized invoices.
        - allow admin to open invoice
-
-
-___________________________________MORE URGENT________________________
-admin interface showing true as No
+4. Approval Implementation
+  - model created to store entries
+  - handle logic in view: view for creating approval entry and one for approving the entries
+  - explore notifications ny email
+  - once approved update LPO header status using POST method through view
