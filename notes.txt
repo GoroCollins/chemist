@@ -2,24 +2,25 @@
 2. Create consolidated item entries capturing purchases, sales, and returns through a view.
 3. Add sales invoice finalize option on the front end.
 Implementation of views:
-     Have a list of items as links to item details which can allow editing(Model form/ view)
+     Have a list of items as links to item details which can allow editing(View and template)
        - give a link to item entries
-         - give edit option to only update quantity with reasons.
-     Have a list of vendors as a links to vendor details which can allow editing(Model form/view)
-     Have a list of purchase orders as links to details (receiving)(Model form/view)
-       - on this view give option to create LPO
+         - give edit option to only update quantity with reasons.(View and form)
+     Have a list of vendors as a links to vendor details which can allow editing(View and template)
+       - editing vendor details (view and form)
+     Have a list of purchase orders as links to details (receiving)(view and template)
+       - on this view give option to create LPO.(View nd form)
        - allow editing of open LPOs and viewing and printing for closed LPOs.
        - Implement approvals for LPO.
        - Once approved cannot be editted and one can cancel approval and edit while open.
          - added status field with three options {0:'Open', 1:'Pending Approval', 2: 'Approved', 3:'Cancelled'}
          - when pending approval allow cancellation of users request then set to open(status)
          - when pending approval admin can approve and set to approved(status) or reject set to open(status) and display comments and force admin to comment
-     Have a list of sales invoices as links to details( Model.form/View)
-       - on this view give option to create sales invoice
+     Have a list of sales invoices as links to details( View and template)
+       - on this view give option to create sales invoice.(View and form)
        - allow editing for open invoices and only viewing and printing for finalized invoices.
        - allow admin to open invoice
 4. Approval Implementation
   - model created to store entries
   - handle logic in view: view for creating approval entry and one for approving the entries
   - explore notifications ny email
-  - once approved update LPO header status using POST method through view
+  - once approved update LPO header status using POST method through view and form

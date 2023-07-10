@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit
+from django.views.generic import ListView
 # Create your views here.
 
 def index(request):
@@ -12,9 +13,8 @@ def item_details(request, item_id):
     except Item.DoesNotExist:
         raise Http404('Item does not exist')
     return HttpResponse(i)
-def vendor(requets):
-    # will show vendors list
-    return HttpResponse('List of vendors')
+class VendorListView(ListView):
+    model = Vendor
 
 def purchaseorder(request):
     # will show purchase orders
