@@ -269,7 +269,7 @@ class SalesHeader(models.Model):
     customer = models.CharField(max_length=200)
     date = models.DateField(auto_now=True)
     amount = models.FloatField(editable=False, default=0)
-    finalize = models.BooleanField(default=False)
+    finalize = models.BooleanField(default=True)
     created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
     def save(self, *args, **kwargs):
         user = get_current_user()

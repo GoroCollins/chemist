@@ -89,9 +89,9 @@ class SalesHeaderAdmin(admin.ModelAdmin):
         
     ]
     inlines = [SalesInline]
-    list_display = ('number', 'customer', 'amount', 'date')
+    list_display = ('number', 'customer', 'amount', 'date', 'finalize')
     search_fields = ['number', 'customer', 'amount', 'date']
-    list_filter = ['customer',  'date']
+    list_filter = ['customer',  'date', 'finalize']
     # disable delete of model instances
     def has_delete_permission(self, request, obj = None):
         return False
