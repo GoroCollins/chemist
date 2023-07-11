@@ -24,3 +24,4 @@ Implementation of views:
   - handle logic in view: view for creating approval entry and one for approving the entries
   - explore notifications ny email
   - once approved update LPO header status using POST method through view and form
+5. Design the base html that will be extended
