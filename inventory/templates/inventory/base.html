@@ -1,12 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <title>Inventory System</title>
+        <title>{% block title %}{% endblock %}</title>
         <link rel="icon" type="image/x-icon" href="{% static 'inventory/images/favicon.ico' }">
+        <link rel="stylesheet" href="{% static 'style.css'}">
     </head>
     <body>
-        <h1>Items</h1>
-        <p>List of Items</p>
-        <footer><center>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</center></footer>
+        {% block content %}
+
+        {% endblock %}
     </body>
+    <footer><center>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</center></footer>
 </html>

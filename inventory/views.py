@@ -2,11 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit
 from django.views.generic import ListView
+from django.template import loader
 # Create your views here.
 
 def index(request):
     # will show items list
-    return HttpResponse('List of items')
+    item = Item.objects.values_list('code') # get item code to form link to item details
+    context = {'item': item}
+    template = loader.get_template('item.html')
+    return HttpResponse(template.render(context, request))
 def item_details(request, item_id):
     try:
         i = Item.objects.get(pk=item_id)
