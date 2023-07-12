@@ -2,14 +2,15 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>{% block title %}{% endblock %}</title>
         <link rel="icon" type="image/x-icon" href="{% static 'inventory/images/favicon.ico' }">
         <link rel="stylesheet" href="{% static 'style.css'}">
+        <title>{% block title %}Inventory System{% endblock title %}</title>
     </head>
     <body>
+        {% if user.is_authenticated%}<span>Good {{greeting}} {{user.username| title }}</span>{% else %}<span>Good {{greeting}} Anonymous!</span>{% endif %}
         {% block content %}
-
-        {% endblock %}
+            <p>A modern inventory management system that incorporates creating and approval of LPOs and creation of sales invoices.</p>
+        {% endblock content %}
     </body>
     <footer><center>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</center></footer>
 </html>

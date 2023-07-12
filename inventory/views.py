@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils import timezone
 from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit
 from django.views.generic import ListView
@@ -28,3 +29,22 @@ def salesinvoice(request):
     # will show sales invoices
     return HttpResponse('List of sales invoices')
 
+from datetime import datetime
+
+def greeting():
+    # Get the current time
+    current_time = timezone.now().time()
+    # Convert the time to hours
+    current_hour = current_time.hour
+    # Determine the time category
+    if 5 <= current_hour < 12:
+        time_category = "morning"
+    elif 12 <= current_hour < 17:
+        time_category = "afternoon"
+    elif 17 <= current_hour < 20:
+        time_category = "evening"
+    else:
+        time_category = "night"
+    return time_category
+# Print the time category
+# print("It's currently", time_category)
