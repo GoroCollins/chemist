@@ -2,12 +2,14 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link rel="icon" type="image/x-icon" href="{% static 'inventory/images/favicon.ico' }">
         <link rel="stylesheet" href="{% static 'style.css'}">
         <title>{% block title %}Inventory System{% endblock title %}</title>
     </head>
     <body>
-        {% if user.is_authenticated%}<span>Good {{greeting}} {{user.username| title }}</span>{% else %}<span>Good {{greeting}} Anonymous!</span>{% endif %}
+        {% if user.is_authenticated %}<span>Good {{greeting}} {{user.username| title }}</span>{% else %}<span>Good {{greeting}} Anonymous!</span>{% endif %}
         {% block content %}
             <p>A modern inventory management system that incorporates creating and approval of LPOs and creation of sales invoices.</p>
         {% endblock content %}
