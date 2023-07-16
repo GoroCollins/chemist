@@ -8,7 +8,7 @@ Implementation of views:
      Have a list of vendors as a links to vendor details which can allow editing(View and template)
        - editing vendor details (view and form)
      Have a list of purchase orders as links to details (receiving)(view and template)
-       - on this view give option to create LPO.(View nd form)
+       - on this view give option to create LPO.(form)
        - allow editing of open LPOs and viewing and printing for closed LPOs.
        - Implement approvals for LPO.
        - Once approved cannot be editted and one can cancel approval and edit while open.

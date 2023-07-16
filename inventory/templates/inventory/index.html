@@ -1,7 +1,23 @@
-{% extends "base.html" %}
+{% extends "inventory/base.html" %}
 {% block title %}
-    Landing page
-{% endblock %}
+  <strong>Library</strong>
+{% endblock title %}
+
 {% block content %}
-    Contents
+  <h1>Inventory System</h1>
+  <p>
+    Welcome to e-Chemist, a website developed by
+    <em>Goro Collins</em>!
+  </p>
+  <h2>Dynamic content</h2>
+  <p>The chemist has the following record counts:</p>
+  <ul>
+    <li><strong>Items:</strong> {{ num_items }}</li>
+    <li><strong>Vendors:</strong> {{ num_vendors }}</li>
+    <li><strong>Sales Invoices:</strong> {{ num_invoices }}</li>
+    <li><strong>Purchase Orders:</strong> {{ num_lpos }}</li>
+  </ul>
+  <p>
+    You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.
+  </p>
 {% endblock %}

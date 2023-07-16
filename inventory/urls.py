@@ -1,10 +1,15 @@
 from django.urls import path 
 from . import views
-from inventory.views import VendorListView
 
 urlpatterns = [
     path("", views.index, name='index'),
-    path("vendor", VendorListView.as_view(), name='vendor'),
-    path('purchaseorder',views.purchaseorder, name='purchaseorder'),
-    path('salesinvoice', views.salesinvoice, name='salesinvoice'),
+    path("vendors/", views.VendorListView.as_view(), name='vendors'),
+    path('vendor-detail/<str:pk>', views.VendorDetailView.as_view(), name='vendor-detail'),
+    path('items/',views.ItemListView, name='items'),
+    path('item-detail/<str:pk>', views.ItemDetailView.as_view(), name='item-detail'),
+    path('purchaseorders/', views.PurchaseOrderListView, name='purchaseorders'),
+    path('purchaseorder-detail/<str:pk>', views.PurchaseOrderDetailView, name='purchaseorder-detail'),
+    path('invoices/', views.SalesInvoiceListView, name='invoices'),
+    path('invoice-detail/<str:pk>', views.SalesInvoiceDetailView, name='invoice-detail'),
+    path('approvals/', views.ApprovalListView, name='approvals'),
 ]

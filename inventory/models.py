@@ -6,9 +6,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import datetime
-from django import forms
+from django.urls import reverse
 
-## Custom fieldtype
+# Custom fieldtype
 import re
 from django.db import models
 from django.utils import timezone
@@ -129,6 +129,9 @@ class Item(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='Items', related_query_name='Items')
     def __str__(self) -> str:
         return self.description
+    def get_absolute_url(self):
+        """Returns the url to access a particular item instance"""
+        return reverse('item-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Items'
 
@@ -141,6 +144,9 @@ class Vendor(models.Model):
     kra_pin = models.CharField(max_length=30)
     def __str__(self) -> str:
         return self.description
+    def get_absolute_url(self):
+        """Returns url to access a particular vendor instance"""
+        return reverse('vendor-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Vendors'
 
@@ -169,6 +175,8 @@ class PurchaseHeader(models.Model):
 
     def __str__(self) -> str:
         return self.number
+    def get_absolute_url(self):
+        return reverse('purchaseorder-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Purchase Orders'
 class PurchaseLine(models.Model):
@@ -283,6 +291,8 @@ class SalesHeader(models.Model):
         super(SalesHeader, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return self.number
+    def get_absolute_url(self):
+        return reverse('invoice-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Sales Invoices'
 
@@ -332,6 +342,11 @@ class ApprovalEntry(models.Model):
     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='modifier', related_query_name='modifier',editable=False)
     due_date = models.DateField(default=timezone.now)
     overdue = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f'{self.requester}-{self.document_number}: {self.details}'
+    def get_absolute_url(self):
+        return reverse('approval-detail', args=[str(self.id)])
 
 
 

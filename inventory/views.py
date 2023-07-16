@@ -1,50 +1,59 @@
 from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse, Http404
-from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit
-from django.views.generic import ListView
+from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry
+from django.views import generic
 from django.template import loader
 # Create your views here.
 
 def index(request):
-    # will show items list
-    item = Item.objects.values_list('code') # get item code to form link to item details
-    context = {'item': item}
-    template = loader.get_template('item.html')
-    return HttpResponse(template.render(context, request))
-def item_details(request, item_id):
-    try:
-        i = Item.objects.get(pk=item_id)
-    except Item.DoesNotExist:
-        raise Http404('Item does not exist')
-    return HttpResponse(i)
-class VendorListView(ListView):
+    """View function for home page of site."""
+
+    # Generate counts of some of the main objects
+    num_items = Item.objects.count()
+    num_vendors = Vendor.objects.count()
+    num_invoices = SalesHeader.objects.count()
+    num_lpos = PurchaseHeader.objects.count()
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
+
+    context = {
+        'num_items': num_items,
+        'num_vendors': num_vendors,
+        'num_invoices': num_invoices,
+        'num_lpos': num_lpos,
+        'num_visits': num_visits,
+    }
+
+    # Render the HTML template index.html with the data in the context variable
+    return render(request, 'inventory/index.html', context=context)
+class VendorListView(generic.ListView):
     model = Vendor
 
-def purchaseorder(request):
-    # will show purchase orders
-    return HttpResponse('List of purchase orders')
+class VendorDetailView(generic.DetailView):
+    model = Vendor
 
-def salesinvoice(request):
-    # will show sales invoices
-    return HttpResponse('List of sales invoices')
+class ItemListView(generic.ListView):
+    model = Item
 
-from datetime import datetime
+class ItemDetailView(generic.DetailView):
+    model = Item
 
-def greeting():
-    # Get the current time
-    current_time = timezone.now().time()
-    # Convert the time to hours
-    current_hour = current_time.hour
-    # Determine the time category
-    if 5 <= current_hour < 12:
-        time_category = "morning"
-    elif 12 <= current_hour < 17:
-        time_category = "afternoon"
-    elif 17 <= current_hour < 20:
-        time_category = "evening"
-    else:
-        time_category = "night"
-    return time_category
-# Print the time category
-# print("It's currently", time_category)
+class PurchaseOrderListView(generic.DetailView):
+    model = PurchaseHeader
+
+class PurchaseOrderDetailView(generic.DetailView):
+    model = PurchaseHeader
+
+class SalesInvoiceListView(generic.ListView):
+    model = SalesHeader
+
+class SalesInvoiceDetailView(generic.DetailView):
+    model = SalesHeader
+
+class ApprovalListView(generic.ListView):
+    model = ApprovalEntry
+
+
+
+
