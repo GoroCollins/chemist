@@ -17,6 +17,9 @@
     <li><strong>Sales Invoices:</strong> {{ num_invoices }}</li>
     <li><strong>Purchase Orders:</strong> {{ num_lpos }}</li>
   </ul>
+  <p>Your workload</p>
+  <li><strong>Pending LPOs:</strong>{{pending_lpo}}</li>
+  <li><strong>Open LPOs:</strong>{{open_lpo}}</li>
   <p>
     You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.
   </p>
