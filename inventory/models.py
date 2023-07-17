@@ -134,6 +134,7 @@ class Item(models.Model):
         return reverse('item-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Items'
+        ordering = ["code"]
 
 class Vendor(models.Model):
     code = VendorCode('Vendor Code',primary_key=True, editable=False)
@@ -149,6 +150,7 @@ class Vendor(models.Model):
         return reverse('vendor-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Vendors'
+        ordering = ["code"]
 
 class PurchaseHeader(models.Model):
     number = AlphanumericAutoField(primary_key=True, editable=False)
@@ -179,6 +181,7 @@ class PurchaseHeader(models.Model):
         return reverse('purchaseorder-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Purchase Orders'
+        ordering = ["number"]
 class PurchaseLine(models.Model):
     number = models.ForeignKey(PurchaseHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo')
@@ -295,6 +298,7 @@ class SalesHeader(models.Model):
         return reverse('invoice-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Sales Invoices'
+        ordering = ["number"]
 
 class SalesLines(models.Model):
     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
@@ -347,6 +351,11 @@ class ApprovalEntry(models.Model):
         return f'{self.requester}-{self.document_number}: {self.details}'
     def get_absolute_url(self):
         return reverse('approval-detail', args=[str(self.id)])
+    
+    class Meta:
+        ordering = ["id"]
+        verbose_name_plural = "Approval Entries"
+        
 
 
 
