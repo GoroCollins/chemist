@@ -1,0 +1,10 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+    <h1>List of Vendors</h1>
+    <ul>
+        {% for vendor in vendor_list %}
+        <li><a href="{% url 'vendor-detail' vendor.pk %}">{{vendor.code}}</a></li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}
