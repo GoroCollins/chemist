@@ -118,6 +118,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# Specify the static root directory where static files will be collected during development
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Add the static directories where Django should look for static files during development
+STATICFILES_DIRS = [
+    BASE_DIR / 'static/',
+]
+
 STATIC_URL = 'static/'
 
 # Default primary key field type

@@ -1,10 +1,38 @@
 {% extends "inventory/base.html" %}
 {% block title %}
-    <strong>Vendor Details</strong> 
+    Vendor Details
 {% endblock %}
 {% block content %}
-    <h1>Details</h1>
+    <h1>Vendor Card</h1>
     <ul>
-        <li><a href="">{{vendor}}</a></li>
+        <li><strong>Code:</strong>{{vendor.code}}</li>
+        <li><strong>Name:</strong>{{vendor.description}}</li>
+        <li><strong>KRA PIN:</strong>{{vendor.kra_pin}}</li>
+        <li><strong>Email:</strong><a href="mailto:{{vendor.contact_email}}">{{vendor.contact_email}}</a></li>
+        <li><strong>Phone Number:</strong><a href="tel:{{vendor.contact_phone}}">{{vendor.contact_phone}}</a></li>
+        <li><strong>Physical Address:</strong>{{vendor.address}}</li>
     </ul>
+    <h2>Vendor Entries</h2>
+    <table>
+        <tr>
+            <th>Purchase Order Number</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Modified By</th>
+            <th>Last Modified</th>
+        </tr>
+        {% for lpo in vendor.vendor.all %}
+        <tr>
+            <td><a href="{% url 'purchaseorder-detail' lpo.pk}">{{lpo.number}}</a></td>
+            <td>{{lpo.date}}</td>
+            <td>Ksh.{{lpo.total}}</td>
+            <td>{{lpo.status}}</td>
+            <td>{{lpo.created_by}}</td>
+            <td>{{lpo.modified_by}}</td>
+            <td>{{lpo.last_modified_at}}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
