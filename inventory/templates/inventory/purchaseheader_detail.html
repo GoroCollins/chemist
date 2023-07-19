@@ -5,14 +5,14 @@
 {% block content %}
     <h1>Purchase Order Card</h1>
     <ul>
-        <li><strong>Number:</strong>{{object.number}}</li>
-        <li><strong>Vendor:</strong>{{object.vendor}}</li>
-        <li><strong>Date:</strong>{{object.date}}</li>
-        <li><strong>Total:</strong>{{object.total}}</li>
-        <li><strong>Status:</strong>{{object.get_status_display}}</li>
-        <li><strong>Created By:</strong>{{object.created_by}}</li>
-        <li><strong>Modified By:</strong>{{object.modified_by}}</li>
-        <li><strong>Modified:</strong>{{object.last_modified_at}}</li>
+        <li><strong>Number:</strong>{{purchaseheader.number}}</li>
+        <li><strong>Vendor:</strong>{{purchaseheader.vendor}}</li>
+        <li><strong>Date:</strong>{{purchaseheader.date}}</li>
+        <li><strong>Total:</strong>{{purchaseheader.total}}</li>
+        <li><strong>Status:</strong>{{purchaseheader.get_status_display}}</li>
+        <li><strong>Created By:</strong>{{purchaseheader.created_by}}</li>
+        <li><strong>Modified By:</strong>{{purchaseheader.modified_by}}</li>
+        <li><strong>Modified:</strong>{{purchaseheader.last_modified_at}}</li>
     </ul>
     <h2>Purchase Order Lines</h2>
 {% endblock %}

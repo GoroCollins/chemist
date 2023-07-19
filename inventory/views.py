@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry
@@ -53,6 +53,11 @@ class PurchaseOrderListView(generic.ListView):
 
 class PurchaseOrderDetailView(generic.DetailView):
     model = PurchaseHeader
+    template_name = 'inventory/purchaseheader_detail.html'  # Ensure correct template name
+
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(PurchaseHeader, number=pk)
 
 class SalesInvoiceListView(generic.ListView):
     model = SalesHeader
