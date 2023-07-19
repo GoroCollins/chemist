@@ -47,7 +47,7 @@ class ItemDetailView(generic.DetailView):
     model = Item
     paginate_by = 25
 
-class PurchaseOrderListView(generic.DetailView):
+class PurchaseOrderListView(generic.ListView):
     model = PurchaseHeader
     paginate_by = 25
 

@@ -158,7 +158,7 @@ class PurchaseHeader(models.Model):
     date = models.DateField(auto_now_add=True, editable=False)
     total = models.IntegerField(editable=False, default=0)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    approval_status = [(0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled Approval')]
+    approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled Approval'))
     status = models.CharField(max_length=30, choices=approval_status, default=0)
     created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
@@ -337,7 +337,7 @@ class ApprovalEntry(models.Model):
     requester = models.ForeignKey('auth.User', blank=True, null=True, on_delete=models.PROTECT, related_name='requestor', related_query_name='requestor')
     document_number = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval', related_query_name='approval')
     details = models.CharField(max_length=200)
-    approval_status = [(0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled Approval')]
+    approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled Approval'))
     status = models.CharField(max_length=20, choices=approval_status)
     approver = models.ForeignKey('auth.User', on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
     amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')

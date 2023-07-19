@@ -1,0 +1,18 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Purchase Order Details
+{% endblock %}
+{% block content %}
+    <h1>Purchase Order Card</h1>
+    <ul>
+        <li><strong>Number:</strong>{{object.number}}</li>
+        <li><strong>Vendor:</strong>{{object.vendor}}</li>
+        <li><strong>Date:</strong>{{object.date}}</li>
+        <li><strong>Total:</strong>{{object.total}}</li>
+        <li><strong>Status:</strong>{{object.get_status_display}}</li>
+        <li><strong>Created By:</strong>{{object.created_by}}</li>
+        <li><strong>Modified By:</strong>{{object.modified_by}}</li>
+        <li><strong>Modified:</strong>{{object.last_modified_at}}</li>
+    </ul>
+    <h2>Purchase Order Lines</h2>
+{% endblock %}

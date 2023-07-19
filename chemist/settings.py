@@ -122,8 +122,10 @@ USE_TZ = True
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Add the static directories where Django should look for static files during development
+#STATICFILES_DIRS setting is used to specify additional directories where you can store static files that are not associated with a specific app. 
+# This allows you to organize your static files in a more centralized manner.
 STATICFILES_DIRS = [
-    BASE_DIR / 'static/',
+    BASE_DIR / 'static',  # It should be a tuple containing the paths to the directories where you store static files outside of the app-specific static directories.
 ]
 
 STATIC_URL = 'static/'

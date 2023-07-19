@@ -1,0 +1,13 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Purchase Orders
+{% endblock %}
+{% block content %}
+    <h1>List of Purchase Orders</h1>
+    <ul>
+        {% for lpo in purchaseheader_list %}
+        <li><a href="{% url 'purchaseorder-detail' lpo.pk}">{{lpo.number}}</a></li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}

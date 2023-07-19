@@ -28,7 +28,7 @@
             <td><a href="{% url 'purchaseorder-detail' lpo.pk}">{{lpo.number}}</a></td>
             <td>{{lpo.date}}</td>
             <td>Ksh.{{lpo.total}}</td>
-            <td>{{lpo.status}}</td>
+            <td>{{lpo.get_status_display}}</td>
             <td>{{lpo.created_by}}</td>
             <td>{{lpo.modified_by}}</td>
             <td>{{lpo.last_modified_at}}</td>
