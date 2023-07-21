@@ -30,17 +30,17 @@ class AlphanumericAutoField(models.CharField):
 
             if latest_value:
                 # Extract the prefix, year, and number components from the latest value
-                match = re.match(r'LPO(\d+)/(\d+)', latest_value)
+                match = re.match(r'LPO(\d+)-(\d+)', latest_value)
                 if match:
                     year = match.group(1)
                     number = match.group(2)
                     new_number = int(number) + 1
-                    new_value = f'LPO{year}/{new_number:05d}'
+                    new_value = f'LPO{year}-{new_number:05d}'
                 else:
                     # Invalid format, fallback to initial value
-                    new_value = f'LPO{current_year}/00001'
+                    new_value = f'LPO{current_year}-00001'
             else:
-                new_value = f'LPO{current_year}/00001'
+                new_value = f'LPO{current_year}-00001'
 
             setattr(model_instance, self.attname, new_value)
 
@@ -64,17 +64,17 @@ class SalesInvoice(models.CharField):
 
             if latest_value:
                 # Extract the prefix, year, and number components from the latest value
-                match = re.match(r'SINV(\d+)/(\d+)', latest_value)
+                match = re.match(r'SINV(\d+)-(\d+)', latest_value)
                 if match:
                     year = match.group(1)
                     number = match.group(2)
                     new_number = int(number) + 1
-                    new_value = f'SINV{year}/{new_number:05d}'
+                    new_value = f'SINV{year}-{new_number:05d}'
                 else:
                     # Invalid format, fallback to initial value
-                    new_value = f'SINV{current_year}/00001'
+                    new_value = f'SINV{current_year}-00001'
             else:
-                new_value = f'SINV{current_year}/00001'
+                new_value = f'SINV{current_year}-00001'
 
             setattr(model_instance, self.attname, new_value)
 

@@ -1,0 +1,13 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Approval Entries
+{% endblock %}
+{% block content %}
+    <h1>List of Approvals</h1>
+    <ul>
+        {% for approval in approvalentry_list %}
+        <li><a href="{% url 'approval-detail' approval.pk %}">{{approval.id}}</a>&nbsp; {{approval.description}}</li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}

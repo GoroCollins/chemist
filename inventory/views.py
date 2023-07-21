@@ -47,11 +47,11 @@ class ItemDetailView(generic.DetailView):
     model = Item
     paginate_by = 25
 
-class PurchaseOrderListView(generic.ListView):
+class PurchaseHeaderListView(generic.ListView):
     model = PurchaseHeader
     paginate_by = 25
 
-class PurchaseOrderDetailView(generic.DetailView):
+class PurchaseHeaderDetailView(generic.DetailView):
     model = PurchaseHeader
     template_name = 'inventory/purchaseheader_detail.html'  # Ensure correct template name
 
@@ -70,6 +70,10 @@ class SalesInvoiceDetailView(generic.DetailView):
 class ApprovalListView(generic.ListView):
     model = ApprovalEntry
     paginate_by = 10
+
+class ApprovalDetailView(generic.DetailView):
+    model = ApprovalEntry
+    paginate_by =10
 
 
 

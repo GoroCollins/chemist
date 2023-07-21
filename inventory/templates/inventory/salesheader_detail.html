@@ -1,0 +1,16 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Sales Invoice Details
+{% endblock %}
+{% block content %}
+    <h1>Sales Invoice Card</h1>
+    <ul>
+        <li><strong>Number:</strong>{{salesheader.number}}</li>
+        <li><strong>Customer:</strong>{{salesheader.customer}}</li>
+        <li><strong>Date:</strong>{{salesheader.date}}</li>
+        <li><strong>Amount:</strong>{{salesheader.amount}}</li>
+        <li><strong>Finalized:</strong>{{salesheader.finalize}}</li>
+        <li><strong>Created By:</strong>{{salesheader.created_by}}</li>
+    </ul>
+    <h2>Sales Invoice Lines</h2>
+{% endblock %}

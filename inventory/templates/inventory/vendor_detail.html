@@ -25,7 +25,7 @@
         </tr>
         {% for lpo in vendor.vendor.all %}
         <tr>
-            <td><a href="{% url 'purchaseorder-detail' lpo.pk}">{{lpo.number}}</a></td>
+            <td><a href="{% url 'purchaseorder-detail' lpo.pk %}">{{lpo.number}}</a></td>
             <td>{{lpo.date}}</td>
             <td>Ksh.{{lpo.total}}</td>
             <td>{{lpo.get_status_display}}</td>

@@ -1,0 +1,13 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Sales Invoices
+{% endblock %}
+{% block content %}
+    <h1>List of Sales invoices</h1>
+    <ul>
+        {% for invoice in salesheader_list %}
+        <li><a href="{{ invoice.get_absolute_url }}">{{invoice.number}}</a></li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}
