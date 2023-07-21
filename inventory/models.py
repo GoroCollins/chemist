@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 import datetime
 from django.urls import reverse
+from django.core.validators import MaxValueValidator
 
 # Custom fieldtype
 import re
@@ -185,12 +186,13 @@ class PurchaseHeader(models.Model):
 class PurchaseLine(models.Model):
     number = models.ForeignKey(PurchaseHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo')
-    batch = models.CharField('Item Batch Number',max_length=200)
+    batch = models.CharField('Item Batch Number',max_length=200, null=True)
     quantity_requested = models.PositiveIntegerField()
     unit_price = models.PositiveIntegerField('Unit Price')
     total = models.IntegerField(editable=False)
-    expiry_date = models.DateField('Expiry date')
+    expiry_date = models.DateField('Expiry date', null=True)
     quantity_received = models.PositiveIntegerField(default=0)
+    markup = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=40, help_text="Percentage Markup")
     invoice_no = models.CharField('Vendor Invoice Number',max_length=100, null=True)
 
     def save(self, *args, **kwargs):
@@ -200,6 +202,10 @@ class PurchaseLine(models.Model):
                 raise ValidationError('You cannot receive more than requested')
             if not self.invoice_no:
                 raise ValidationError('Enter vendor invoice number')
+            if not self.batch:
+                raise ValidationError('Enter batch number')
+            if not self.expiry_date:
+                raise ValidationError('Enter expiry date')
 
             # Update values of corresponding fields in ItemEntry
             item_entry = self.item_entry.first()
@@ -207,6 +213,7 @@ class PurchaseLine(models.Model):
             item_entry.quantity = self.quantity_received
             item_entry.expiry_date = self.expiry_date
             item_entry.cost = self.unit_price
+            item_entry.sale = self.unit_price * (1 + (self.markup/100))
             item_entry.save()
 
         else:
@@ -222,7 +229,8 @@ class PurchaseLine(models.Model):
                 batch=self.batch,
                 quantity=self.quantity_received,
                 expiry_date=self.expiry_date,
-                cost=self.unit_price
+                cost=self.unit_price,
+                sale=self.unit_price * (1 + (self.markup/100))
             )
 
             # Assign the created ItemEntry instance to the foreign key field
@@ -251,8 +259,8 @@ class ItemEntry(models.Model):
     batch = models.CharField('Batch Number', max_length=200)
     quantity = models.IntegerField()
     expiry_date = models.DateField('Expiry Date')
-    cost = models.IntegerField()
-    sale = models.IntegerField()
+    cost = models.FloatField()
+    sale = models.FloatField()
     expiry_status = models.BooleanField(default=False)
     source_code = models.CharField(max_length=100)
     @property
@@ -266,7 +274,7 @@ class ItemEntry(models.Model):
             return 'RETURNS'
     def save(self, *args, **kwargs):
         self.expiry_status = self.is_expired
-        self.sale = self.cost * 1.4
+        #self.sale = self.cost * 1.4
         self.source_code = self.get_source_code()
         if self.sale <= self.cost:
             raise ValidationError('Selling price must be higher than the buying prce')
