@@ -6,7 +6,7 @@
     <h1>List of Approvals</h1>
     <ul>
         {% for approval in approvalentry_list %}
-        <li><a href="{% url 'approval-detail' approval.pk %}">{{approval.id}}</a>&nbsp; {{approval.description}}</li>
+        <li><a href="{% url 'approval-detail' approval.pk %}">{{approval.id}}</a>&nbsp; Approval request for:{{approval.description}} Amount:{{approval.amount}}</li>
         {% endfor %}
     </ul>
         

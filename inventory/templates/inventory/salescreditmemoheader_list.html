@@ -1,0 +1,13 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Sales Credit Memos
+{% endblock %}
+{% block content %}
+    <h1>List of Sales Credit Memos</h1>
+    <ul>
+        {% for salesmemo in salescreditmemoheader_list %}
+        <li><a href="{{ salesmemo.get_absolute_url }}">{{salesmemo.number}}</a></li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}

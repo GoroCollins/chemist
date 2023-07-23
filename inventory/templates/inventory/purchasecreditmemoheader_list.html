@@ -1,0 +1,13 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Purchase Credit Memos
+{% endblock %}
+{% block content %}
+    <h1>List of Purchase Credit Memos</h1>
+    <ul>
+        {% for purchasememo in purchasecreditmemoheader_list %}
+        <li><a href="{{ purchasememo.get_absolute_url }}">{{purchasememo.number}}</a></li>
+        {% endfor %}
+    </ul>
+        
+{% endblock %}

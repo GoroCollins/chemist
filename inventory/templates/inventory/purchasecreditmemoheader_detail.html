@@ -1,0 +1,15 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Purchase Credit Memo Details
+{% endblock %}
+{% block content %}
+    <h1>Purchase Credit Memo Card</h1>
+    <ul>
+        <li><strong>Number:</strong>{{purchasecreditmemoheader.number}}</li>
+        <li><strong>Vendor:</strong>{{purchasecreditmemoheader.vendor}}</li>
+        <li><strong>Date:</strong>{{purchasecreditmemoheader.date}}</li>
+        <li><strong>Total:</strong>{{purchasecreditmemoheader.amount}}</li>
+        <li><strong>Created By:</strong>{{purchasecreditmemoheader.created_by}}</li>
+    </ul>
+    <h2>Purchase Credit Memo Lines</h2>
+{% endblock %}

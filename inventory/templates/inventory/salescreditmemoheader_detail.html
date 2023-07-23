@@ -1,0 +1,15 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Sales Credit Memo Details
+{% endblock %}
+{% block content %}
+    <h1>Sales Credit Memo Card</h1>
+    <ul>
+        <li><strong>Number:</strong>{{salescreditmemoheader.number}}</li>
+        <li><strong>Customer:</strong>{{salescreditmemoheader.customer}}</li>
+        <li><strong>Date:</strong>{{salescreditmemoheader.date}}</li>
+        <li><strong>Amount:</strong>{{salescreditmemoheader.amount}}</li>
+        <li><strong>Created By:</strong>{{salescreditmemoheader.created_by}}</li>
+    </ul>
+    <h2>Sales Credit Memo Lines</h2>
+{% endblock %}

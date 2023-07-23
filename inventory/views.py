@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.http import HttpResponse, Http404
-from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry
+from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine
 from django.views import generic
 from django.template import loader
 # Create your views here.
@@ -75,6 +75,19 @@ class ApprovalDetailView(generic.DetailView):
     model = ApprovalEntry
     paginate_by =10
 
+class SalesCreditMemoListView(generic.ListView):
+    model = SalesCreditMemoHeader
+    paginate_by = 25
+
+class SalesCreditMemoDetailView(generic.DetailView):
+    model = SalesCreditMemoHeader
+
+class PurchaseCreditMemoListView(generic.ListView):
+    model = PurchaseCreditMemoHeader
+    paginate_by = 25
+
+class PurchaseCreditMemoDetailView(generic.DetailView):
+    model = PurchaseCreditMemoHeader
 
 
 

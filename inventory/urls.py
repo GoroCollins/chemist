@@ -9,8 +9,12 @@ urlpatterns = [
     path('item-detail/<str:pk>/', views.ItemDetailView.as_view(), name='item-detail'),
     path('purchaseorders/', views.PurchaseHeaderListView.as_view(), name='purchaseorders'),
     path('purchaseorder-detail/<str:pk>/', views.PurchaseHeaderDetailView.as_view(), name='purchaseorder-detail'),
+    path('purchasememos/', views.PurchaseCreditMemoListView.as_view(), name='purchasememos'),
+    path('purchasememo-detail/<str:pk>', views.PurchaseCreditMemoDetailView.as_view(), name='purchasememo-detail'),
     path('invoices/', views.SalesInvoiceListView.as_view(), name='invoices'),
     path('invoice-detail/<str:pk>/', views.SalesInvoiceDetailView.as_view(), name='invoice-detail'),
+    path('salesmemos/', views.SalesCreditMemoListView.as_view(), name='salesmemos'),
+    path('salesmemo-detail/<str:pk>', views.SalesCreditMemoDetailView.as_view(), name='salesmemo-detail'),
     path('approvals/', views.ApprovalListView.as_view(), name='approvals'),
     path('approval-detail/<int:pk>/', views.ApprovalDetailView.as_view(), name='approval-detail'),
 ]

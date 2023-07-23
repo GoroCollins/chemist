@@ -5,7 +5,7 @@ admin.site.site_header = 'Chemist Administration'
 admin.site.index_title = 'Customization Interface'
 
 # Register your models here.
-from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry, SalesHeader, SalesLines
+from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry, SalesHeader, SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine
 
 class UnitAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["code"]}), ('Unit information', {"fields": ["description"]}),]
@@ -95,4 +95,11 @@ class SalesHeaderAdmin(admin.ModelAdmin):
     # disable delete of model instances
     def has_delete_permission(self, request, obj = None):
         return False
+
+class SalesCreditMemoInline(admin.StackedInline):
+    model = SalesCreditMemoLine
+    extra = 1
+@admin.register(SalesCreditMemoHeader)
+class SalesCreditMemoHeaderAdmin(admin.ModelAdmin):
+    inlines = [SalesCreditMemoInline]
 

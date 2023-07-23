@@ -27,18 +27,4 @@ Implementation of views:
 5. Design the base html that will be extended
 6. All lists to be tables without borders and primary link to be a link to the details
 7. Details to have sections with clickable section heads to reveal contents
-------List code for item entries------------------
-    <ul>
-        {% for entry in item.grn.all %}
-        <li><strong>Entry Date:</strong>{{entry.entry_date}}</li>
-        <li><strong>Purchase Document Number:</strong>{{entry.purchase_doc_no}}</li>
-        <li><strong>Batch Number:</strong>{{entry.batch}}</li>
-        <li><strong>Quantity:</strong>{{entry.quantity}}</li>
-        <li><strong>Expiry Date:</strong>{{entry.expiry_date}}</li>
-        <li><strong>Buying Price:</strong>{{entry.cost}}</li>
-        <li><strong>Selling Price:</strong>{{entry.sale}}</li>
-        <li><strong>Expiry Status:</strong>{{entry.expiry_status}}</li>
-        <li><strong>Source Code:</strong>{{entry.source_code}}</li>
-        {% endfor %}
-    </ul>
-------------------------------------------------------------------------------
+

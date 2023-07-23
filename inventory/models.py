@@ -113,6 +113,72 @@ class VendorCode(models.CharField):
             setattr(model_instance, self.attname, new_value)
 
         return super().pre_save(model_instance, add)
+    
+class SalesCreditMemo(models.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 15  # Maximum length of the alphanumeric value
+        kwargs['unique'] = True    # Ensure uniqueness of the field
+        super().__init__(*args, **kwargs)
+
+    def pre_save(self, model_instance, add):
+        if add and not getattr(model_instance, self.attname):
+            current_year = timezone.now().year
+
+            # Retrieve the latest alphanumeric value from the table for the current year
+            latest_value = model_instance.__class__.objects.filter(
+                **{self.attname + '__startswith': 'SCM' + str(current_year)}
+            ).order_by('-number').values_list(self.attname, flat=True).first()
+
+            if latest_value:
+                # Extract the prefix, year, and number components from the latest value
+                match = re.match(r'SCM(\d+)-(\d+)', latest_value)
+                if match:
+                    year = match.group(1)
+                    number = match.group(2)
+                    new_number = int(number) + 1
+                    new_value = f'SCM{year}-{new_number:05d}'
+                else:
+                    # Invalid format, fallback to initial value
+                    new_value = f'SCM{current_year}-00001'
+            else:
+                new_value = f'SCM{current_year}-00001'
+
+            setattr(model_instance, self.attname, new_value)
+
+        return super().pre_save(model_instance, add)
+
+class PurchaseCreditMemo(models.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 15  # Maximum length of the alphanumeric value
+        kwargs['unique'] = True    # Ensure uniqueness of the field
+        super().__init__(*args, **kwargs)
+
+    def pre_save(self, model_instance, add):
+        if add and not getattr(model_instance, self.attname):
+            current_year = timezone.now().year
+
+            # Retrieve the latest alphanumeric value from the table for the current year
+            latest_value = model_instance.__class__.objects.filter(
+                **{self.attname + '__startswith': 'PCM' + str(current_year)}
+            ).order_by('-number').values_list(self.attname, flat=True).first()
+
+            if latest_value:
+                # Extract the prefix, year, and number components from the latest value
+                match = re.match(r'PCM(\d+)-(\d+)', latest_value)
+                if match:
+                    year = match.group(1)
+                    number = match.group(2)
+                    new_number = int(number) + 1
+                    new_value = f'PCM{year}-{new_number:05d}'
+                else:
+                    # Invalid format, fallback to initial value
+                    new_value = f'PCM{current_year}-00001'
+            else:
+                new_value = f'PCM{current_year}-00001'
+
+            setattr(model_instance, self.attname, new_value)
+
+        return super().pre_save(model_instance, add)
 
 
 # Create your models here.
@@ -252,6 +318,68 @@ def update_lpo_total(sender, instance, created, **kwargs):
         lpo_header.total = total_amount or 0
         lpo_header.save()
 
+class PurchaseCreditMemoHeader(models.Model):
+    number = PurchaseCreditMemo(primary_key=True, editable=False)
+    vendor = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='memo', related_query_name='memo')
+    date = models.DateField(auto_now=True)
+    amount = models.PositiveBigIntegerField()
+    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
+
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and not user.pk:
+            user = None
+        if not self.pk:
+            self.created_by = user
+        self.modified_by = user
+        super(PurchaseHeader, self).save(*args, **kwargs)
+    
+    def __str__(self) -> str:
+        return f'{self.number}'
+    def get_absolute_url(self):
+        return reverse('purchasememo-detail', args=[str(self.number)])
+    class Meta:
+        ordering = ["number"]
+        verbose_name_plural = "Purchase Credit Memos"
+
+class PurchaseCreditMemoLine(models.Model):
+    number = models.ForeignKey(PurchaseCreditMemoHeader, on_delete=models.PROTECT, related_name='line', related_query_name='line')
+    item = models.CharField(max_length=100)
+    purchase_line = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='purchase_line', related_query_name='purchase_line')
+    batch = models.CharField(max_length=100)
+    unit_price = models.PositiveIntegerField(editable=False)
+    quantity = models.PositiveIntegerField()
+    total = models.PositiveIntegerField()
+    item_entry = models.ForeignKey('ItemEntry', on_delete=models.PROTECT, related_name='purchase_return', related_query_name='purchase_return')
+
+    def __str__(self) -> str:
+        return f'{self.number}'
+    
+    def save(self, *args, **kwargs):
+        if not self.unit_price:
+            purchase_line = self.purchase_line
+            if purchase_line:
+                self.item = purchase_line.item
+                self.batch = purchase_line.batch
+                self.unit_price = purchase_line.unit_price
+                if self.quantity > purchase_line.quantity_received:
+                    raise ValidationError(f'You cannot returned more({self.quantity}) than delivered({purchase_line.quantity_received})')
+            item_entry = self.item_entry
+            if item_entry:
+                item_entry.quantity -= self.quantity
+                item_entry.save()
+        self.total = self.unit_price * self.quantity
+        super(PurchaseCreditMemoLine, self).save(*args, **kwargs)
+
+@receiver(post_save, sender=PurchaseCreditMemoLine)
+def update_memo_total(sender, instance, created, **kwargs):
+    if created:
+        purchase_memo = instance.number
+        total_amount = purchase_memo.line.aggregate(total=Sum('total'))['total']
+        purchase_memo.amount = total_amount or 0
+        purchase_memo.save()
+
+
 class ItemEntry(models.Model):
     entry_date = models.DateField(auto_now_add=True, editable=False)
     purchase_doc_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry', null=True, verbose_name='Purchase Document Number')
@@ -316,7 +444,7 @@ class SalesLines(models.Model):
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',  null=True)
     unit_price = models.IntegerField(editable=False)
     total = models.FloatField(editable=False)
-    discount = models.IntegerField('Percentage Discount', default=0)
+    discount = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=40, help_text="Allowed Precentage Discount")
 
     def save(self, *args, **kwargs):
         if not self.unit_price:
@@ -340,6 +468,69 @@ def update_invoice_total(sender, instance, created, **kwargs):
         total_amount = sales_header.lines.aggregate(total=Sum('total'))['total']
         sales_header.amount = total_amount or 0
         sales_header.save()
+
+class SalesCreditMemoHeader(models.Model):
+    number = SalesCreditMemo(primary_key=True, editable=False)
+    customer = models.CharField(max_length=200)
+    date = models.DateField(auto_now=True) # put date logic (should not be earlier than invoice date but can equal invice date)
+    invoice_no = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='credit_memo', related_query_name='credit_memo')
+    amount = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
+
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and not user.pk:
+            user = None
+        if not self.pk:
+            self.created_by = user
+        #self.modified_by = user
+        super(SalesCreditMemoHeader, self).save(*args, **kwargs)
+    def __str__(self) -> str:
+        return f'{self.number}'
+    
+    def get_absolute_url(self):
+        return reverse('salesmemo-detail', args=[str(self.number)])
+    
+    class Meta:
+        ordering = ["number"]
+        verbose_name_plural = 'Sales Credit Memos'
+
+class SalesCreditMemoLine(models.Model):
+    number = models.ForeignKey(SalesCreditMemoHeader, on_delete=models.PROTECT, related_name='line', related_query_name='line')
+    item = models.CharField(help_text='Item to return', max_length=100)
+    sales_line = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='sales_line', related_query_name='sales_line')
+    batch = models.CharField(help_text='Batch number to return', max_length=100)
+    unit_price = models.PositiveIntegerField(editable=False)
+    quantity = models.PositiveIntegerField()
+    total = models.IntegerField(editable=False)
+    item_entry = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales_return', related_query_name='sales_return')
+
+
+    def save(self, *args, **kwargs):
+        if not self.unit_price:
+            invoice_line = self.sales_line
+            if invoice_line:
+                self.item = invoice_line.item 
+                self.batch = invoice_line.batch 
+                self.unit_price = invoice_line.unit_price 
+                if self.quantity > invoice_line.quantity:
+                    raise ValidationError(f'You can return more({self.quantity}) than issued({invoice_line.quantity})')
+            item_entry = self.item_entry
+            if item_entry:
+                item_entry.quantity += self.quantity
+                item_entry.save()
+        self.total = self.unit_price * self.quantity
+        super(SalesCreditMemoLine,self).save(*args, **kwargs)
+    
+    def __str__(self) -> str:
+        return f'{self.number}'
+@receiver(post_save, sender=SalesCreditMemoLine)
+def update_memo_total(sender, instance, created, **kwargs):
+    if created:
+        sales_memo = instance.number
+        total_amount = sales_memo.line.aggregate(total=Sum('total'))['total']
+        sales_memo.amount = total_amount or 0
+        sales_memo.save()
 
 class ApprovalEntry(models.Model):
     requester = models.ForeignKey('auth.User', blank=True, null=True, on_delete=models.PROTECT, related_name='requestor', related_query_name='requestor')
