@@ -184,7 +184,7 @@ class PurchaseCreditMemo(models.CharField):
 # Create your models here.
 class Unit(models.Model):
     code = models.CharField('Unit of measure code',max_length=10, primary_key=True)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, verbose_name='Unit of Measure')
     def __str__(self) -> str:
         return self.description
     class Meta:
