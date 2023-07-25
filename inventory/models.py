@@ -189,6 +189,8 @@ class Unit(models.Model):
         return self.description
     class Meta:
         verbose_name_plural ='Units Of Measure'
+    def get_absolute_url(self):
+        return reverse('unit-detail', args=[str(self.code)])
 
 class Item(models.Model):
     code = models.CharField('Item Code', max_length=20, primary_key=True)

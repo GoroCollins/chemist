@@ -89,5 +89,16 @@ class PurchaseCreditMemoListView(generic.ListView):
 class PurchaseCreditMemoDetailView(generic.DetailView):
     model = PurchaseCreditMemoHeader
 
+class UnitCreateView(generic.edit.CreateView):
+    model = Unit
+    fields = ['code', 'description']
+    
+class UnitListView(generic.ListView):
+    model = Unit
+    paginate_by = 25
+
+class UnitDetailView(generic.DetailView):
+    model = Unit
+
 
 

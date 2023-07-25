@@ -1,0 +1,11 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Unit of Measure
+{% endblock %}
+{% block content %}
+    <h1>Unit Card</h1>
+    <ul>
+        <li><strong>Code:</strong>{{unit.code}}</li>
+        <li><strong>Name:</strong>{{unit.description}}</li>
+    </ul>
+{% endblock %}
