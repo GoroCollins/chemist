@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>List of Vendors</h1>
+    <a href="{% url 'vendor-add' %}">Create Vendor</a>
     <ul>
         {% for vendor in vendor_list %}
         <li><a href="{% url 'vendor-detail' vendor.pk %}">{{vendor.code}}</a>&nbsp;{{vendor.description}}</li>

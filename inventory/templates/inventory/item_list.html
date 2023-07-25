@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>List of Items</h1>
+    <a href="{% url 'item-add' %}">Create Item</a>
     <ul>
         {% for item in item_list %}
         <li><a href="{% url 'item-detail' item.pk %}">{{item.code}}</a>&nbsp; {{item.description}}</li>

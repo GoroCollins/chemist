@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine
 from django.views import generic
 from django.template import loader
+from django.urls import reverse_lazy
 # Create your views here.
 
 def index(request):
@@ -39,6 +40,15 @@ class VendorDetailView(generic.DetailView):
     model = Vendor
     paginate_by = 25
 
+class VendorCreateView(generic.edit.CreateView):
+    model = Vendor
+    fields = ['description', 'contact_email', 'contact_phone', 'address', 'kra_pin']
+    success_url = reverse_lazy("vendors")
+
+class VendorUpdateView(generic.edit.UpdateView):
+    model = Vendor
+    fields = ['contact_email', 'contact_phone', 'address']
+
 class ItemListView(generic.ListView):
     model = Item
     paginate_by = 25
@@ -46,6 +56,15 @@ class ItemListView(generic.ListView):
 class ItemDetailView(generic.DetailView):
     model = Item
     paginate_by = 25
+
+class ItemCreateView(generic.edit.CreateView):
+    model = Item
+    fields = ['code','description', 'unit']
+    success_url = reverse_lazy("items")
+
+class ItemUpdateView(generic.edit.UpdateView):
+    model = Item
+    fields = ['unit']
 
 class PurchaseHeaderListView(generic.ListView):
     model = PurchaseHeader
@@ -92,6 +111,7 @@ class PurchaseCreditMemoDetailView(generic.DetailView):
 class UnitCreateView(generic.edit.CreateView):
     model = Unit
     fields = ['code', 'description']
+    success_url = reverse_lazy("units")
     
 class UnitListView(generic.ListView):
     model = Unit
@@ -99,6 +119,10 @@ class UnitListView(generic.ListView):
 
 class UnitDetailView(generic.DetailView):
     model = Unit
+
+class UnitUpdateView(generic.edit.UpdateView):
+    model = Unit
+    fields = ['description']
 
 
 

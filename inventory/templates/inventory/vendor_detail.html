@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>Vendor Card</h1>
+    <a href="{% url 'vendor-update' vendor.code %}">Update</a>
     <ul>
         <li><strong>Code:</strong>{{vendor.code}}</li>
         <li><strong>Name:</strong>{{vendor.description}}</li>
