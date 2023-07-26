@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 import datetime
 from django.urls import reverse
 from django.core.validators import MaxValueValidator
+from django.contrib.auth.models import User
 
 # Custom fieldtype
 import re
@@ -185,6 +186,7 @@ class PurchaseCreditMemo(models.CharField):
 class Unit(models.Model):
     code = models.CharField('Unit of measure code',max_length=10, primary_key=True)
     description = models.CharField(max_length=200, verbose_name='Unit of Measure')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='units', related_query_name='units')
     def __str__(self) -> str:
         return self.description
     class Meta:
@@ -196,6 +198,7 @@ class Item(models.Model):
     code = models.CharField('Item Code', max_length=20, primary_key=True)
     description = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='Items', related_query_name='Items')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='useritems', related_query_name='useritems')
     def __str__(self) -> str:
         return self.description
     def get_absolute_url(self):
@@ -212,6 +215,7 @@ class Vendor(models.Model):
     contact_phone = PhoneField()
     address = models.CharField(max_length=200)
     kra_pin = models.CharField(max_length=30)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='vendors', related_query_name='vendors')
     def __str__(self) -> str:
         return self.description
     def get_absolute_url(self):

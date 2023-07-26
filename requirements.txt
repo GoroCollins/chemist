@@ -1,0 +1,5 @@
+Django==4.2.2
+django-crum==0.7.9
+django-phone-field==1.8.1
+sqlparse==0.4.4
+
