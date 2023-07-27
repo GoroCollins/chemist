@@ -27,4 +27,14 @@ Implementation of views:
 5. Design the base html that will be extended
 6. All lists to be tables without borders and primary link to be a link to the details
 7. Details to have sections with clickable section heads to reveal contents
-
+--------------------------Sales Invoice Form-----------------------
+<form method="post">
+    {% csrf_token %}
+    {{ header_form.as_p }}
+    {{ lines_formset.management_form }}
+    {% for form in lines_formset %}
+        {{ form.as_p }}
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+--------------------------------------------------------
