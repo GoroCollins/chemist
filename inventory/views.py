@@ -1,5 +1,5 @@
 from django.forms.models import BaseModelForm
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponse, Http404
 from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine
@@ -7,6 +7,8 @@ from django.views import generic
 from django.template import loader
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django import forms
+from . forms import SalesHeaderForm, SalesLinesForm, PurchaseHeaderForm, PurchaseLineForm
 # Create your views here.
 
 def index(request):
@@ -134,6 +136,61 @@ class UnitDetailView(generic.DetailView):
 class UnitUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
     model = Unit
     fields = ['description']
+
+
+def sales_order(request):
+    SalesLinesFormSet = forms.formset_factory(SalesLinesForm, extra=1)
+
+    if request.method == 'POST':
+        header_form = SalesHeaderForm(request.POST, prefix='header')
+        lines_formset = SalesLinesFormSet(request.POST, prefix='lines')
+
+        if header_form.is_valid() and lines_formset.is_valid():
+            header_instance = header_form.save()
+            for form in lines_formset:
+                line_instance = form.save(commit=False)
+                line_instance.number = header_instance
+                line_instance.save()
+
+            # Redirect to a success page or do something else
+            return redirect('invoices')
+
+    else:
+        header_form = SalesHeaderForm(prefix='header')
+        lines_formset = SalesLinesFormSet(prefix='lines')
+
+    context = {
+        'header_form': header_form,
+        'lines_formset': lines_formset,
+    }
+    return render(request, 'inventory/sales_order.html', context)
+
+def purchase_order(request):
+    PurchaseLinesFormSet = forms.formset_factory(PurchaseLineForm, extra=1)
+
+    if request.method == 'POST':
+        header_form = PurchaseHeaderForm(request.POST, prefix='header')
+        lines_formset = PurchaseLinesFormSet(request.POST, prefix='lines')
+
+        if header_form.is_valid() and lines_formset.is_valid():
+            header_instance = header_form.save()
+            for form in lines_formset:
+                line_instance = form.save(commit=False)
+                line_instance.number = header_instance
+                line_instance.save()
+
+            # Redirect to a success page or do something else
+            return redirect('purchaseorders')
+
+    else:
+        header_form = PurchaseHeaderForm(prefix='header')
+        lines_formset = PurchaseLinesFormSet(prefix='lines')
+
+    context = {
+        'header_form': header_form,
+        'lines_formset': lines_formset,
+    }
+    return render(request, 'inventory/purchase_order.html', context)
 
 
 

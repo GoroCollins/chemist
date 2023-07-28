@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>List of Purchase Orders</h1>
+    <a href="{% url 'purchaseorder-create' %}">Create Purchase Order</a>
     <ul>
         {% for lpo in purchaseheader_list %}
         <li><a href="{{ lpo.get_absolute_url }}">{{lpo.number}}</a></li>

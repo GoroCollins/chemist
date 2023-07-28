@@ -259,8 +259,8 @@ class PurchaseLine(models.Model):
     number = models.ForeignKey(PurchaseHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo')
     batch = models.CharField('Item Batch Number',max_length=200, null=True)
-    quantity_requested = models.PositiveIntegerField()
-    unit_price = models.PositiveIntegerField('Unit Price')
+    quantity_requested = models.PositiveIntegerField(help_text='Quantity')
+    unit_price = models.FloatField('Unit Price')
     total = models.IntegerField(editable=False)
     expiry_date = models.DateField('Expiry date', null=True)
     quantity_received = models.PositiveIntegerField(default=0)
@@ -289,10 +289,14 @@ class PurchaseLine(models.Model):
             item_entry.save()
 
         else:
+            if self.unit_price < 0:
+                raise ValidationError('Unit Price must be positive')
+            else:
+                self.total = self.quantity_requested * self.unit_price
             # Update the total value of the PurchaseLine
-            self.total = self.quantity_requested * self.unit_price
+            #self.total = self.quantity_requested * self.unit_price
             # Create a new instance of PurchaseLine
-            super(PurchaseLine, self).save(*args, **kwargs)
+            #super(PurchaseLine, self).save(*args, **kwargs)
 
             # Create a new instance of ItemEntry
             item_entry = ItemEntry.objects.create(
@@ -309,7 +313,7 @@ class PurchaseLine(models.Model):
             #self.number = item_entry
 
             # Calculate the total value of PurchaseLine
-            self.total = self.quantity_requested * self.unit_price
+            #self.total = self.quantity_requested * self.unit_price
 
         super(PurchaseLine, self).save(*args, **kwargs)
 
@@ -392,7 +396,7 @@ class ItemEntry(models.Model):
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
     batch = models.CharField('Batch Number', max_length=200)
     quantity = models.IntegerField()
-    expiry_date = models.DateField('Expiry Date')
+    expiry_date = models.DateField('Expiry Date', default=datetime.date.today)
     cost = models.FloatField()
     sale = models.FloatField()
     expiry_status = models.BooleanField(default=False)
@@ -450,7 +454,7 @@ class SalesLines(models.Model):
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',  null=True)
     unit_price = models.IntegerField(editable=False)
     total = models.FloatField(editable=False)
-    discount = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=40, help_text="Allowed Precentage Discount")
+    discount = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=0, help_text="Allowed Precentage Discount")
 
     def save(self, *args, **kwargs):
         if not self.unit_price:

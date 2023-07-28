@@ -1,0 +1,17 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+Sales Invoice
+{% endblock %}
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <p>Sales Header</p>
+    {{ header_form.as_p }}
+    <p>SalesLines</p>
+    {{ lines_formset.management_form }}
+    {% for form in lines_formset %}
+        {{ form.as_p }}
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

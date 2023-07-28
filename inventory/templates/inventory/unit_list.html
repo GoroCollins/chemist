@@ -7,7 +7,7 @@
     <a href="{% url 'unit-add' %}">Create Unit Of Measure</a>
     <ul>
         {% for unit in unit_list %}
-        <li><a href="{% url 'unit-detail' unit.pk %}">{{unit.code}}</a>&nbsp; {{unit.description}}</li>
+        <li><a href="{% url 'unit-detail' unit.pk %}">{{unit.code}}</a>&nbsp; {{unit.description}}&#124; <a href="{% url 'unit-update' unit.code %}">Edit</a></li>
         {% endfor %}
     </ul>
         
