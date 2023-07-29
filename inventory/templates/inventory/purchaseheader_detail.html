@@ -15,4 +15,32 @@
         <li><strong>Modified:</strong>{{purchaseheader.last_modified_at}}</li>
     </ul>
     <h2>Purchase Order Lines</h2>
+    <table>
+        <tr>
+            <th>Purchase Order Number</th>
+            <th>Item</th>
+            <th>Batch</th>
+            <th>Quantity Requested</th>
+            <th>Unit Price</th>
+            <th>Expiry Date</th>
+            <th>Total</th>
+            <th>Markup</th>
+            <th>Quantity Supplied</th>
+            <th>Supplier Invoice Number</th>
+        </tr>
+        {% for line in purchaseheader.lines.all %}
+        <tr>
+            <td>{{line.number}}</td>
+            <td><a href="{% url 'item-detail' line.item_id%}">{{line.item}}</a></td>
+            <td>{{line.batch}}</td>
+            <td>{{line.quatity_requested}}</td>
+            <td>{{line.unit_price}}</td>
+            <td>{{line.expiry_date}}</td>
+            <td>{{line.total}}</td>
+            <td>{{line.markup}}</td>
+            <td>{{line.quantity_received}}</td>
+            <td>{{line.invoice_no}}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

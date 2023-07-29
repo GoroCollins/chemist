@@ -296,7 +296,7 @@ class PurchaseLine(models.Model):
             # Update the total value of the PurchaseLine
             #self.total = self.quantity_requested * self.unit_price
             # Create a new instance of PurchaseLine
-            #super(PurchaseLine, self).save(*args, **kwargs)
+            super(PurchaseLine, self).save(*args, **kwargs)
 
             # Create a new instance of ItemEntry
             item_entry = ItemEntry.objects.create(
@@ -308,12 +308,6 @@ class PurchaseLine(models.Model):
                 cost=self.unit_price,
                 sale=self.unit_price * (1 + (self.markup/100))
             )
-
-            # Assign the created ItemEntry instance to the foreign key field
-            #self.number = item_entry
-
-            # Calculate the total value of PurchaseLine
-            #self.total = self.quantity_requested * self.unit_price
 
         super(PurchaseLine, self).save(*args, **kwargs)
 
@@ -394,7 +388,7 @@ class ItemEntry(models.Model):
     entry_date = models.DateField(auto_now_add=True, editable=False)
     purchase_doc_no = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='item_entry', related_query_name='item_entry', null=True, verbose_name='Purchase Document Number')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='grn', related_query_name='grn')
-    batch = models.CharField('Batch Number', max_length=200)
+    batch = models.CharField('Batch Number', max_length=200, null=True)
     quantity = models.IntegerField()
     expiry_date = models.DateField('Expiry Date', default=datetime.date.today)
     cost = models.FloatField()
@@ -411,6 +405,8 @@ class ItemEntry(models.Model):
         else:
             return 'RETURNS'
     def save(self, *args, **kwargs):
+        if not self.expiry_date:
+            self.expiry_date = datetime.date.today()
         self.expiry_status = self.is_expired
         #self.sale = self.cost * 1.4
         self.source_code = self.get_source_code()

@@ -36,11 +36,11 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'inventory/index.html', context=context)
-class VendorListView(generic.ListView):
+class VendorListView(generic.ListView, LoginRequiredMixin):
     model = Vendor
     paginate_by = 25
 
-class VendorDetailView(generic.DetailView):
+class VendorDetailView(generic.DetailView, LoginRequiredMixin):
     model = Vendor
     paginate_by = 25
 
@@ -56,11 +56,11 @@ class VendorUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
     model = Vendor
     fields = ['contact_email', 'contact_phone', 'address']
 
-class ItemListView(generic.ListView):
+class ItemListView(generic.ListView, LoginRequiredMixin):
     model = Item
     paginate_by = 25
 
-class ItemDetailView(generic.DetailView):
+class ItemDetailView(generic.DetailView, LoginRequiredMixin):
     model = Item
     paginate_by = 25
 
@@ -76,11 +76,11 @@ class ItemUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
     model = Item
     fields = ['unit']
 
-class PurchaseHeaderListView(generic.ListView):
+class PurchaseHeaderListView(generic.ListView, LoginRequiredMixin):
     model = PurchaseHeader
     paginate_by = 25
 
-class PurchaseHeaderDetailView(generic.DetailView):
+class PurchaseHeaderDetailView(generic.DetailView, LoginRequiredMixin):
     model = PurchaseHeader
     template_name = 'inventory/purchaseheader_detail.html'  # Ensure correct template name
 
@@ -88,34 +88,34 @@ class PurchaseHeaderDetailView(generic.DetailView):
         pk = self.kwargs.get('pk')
         return get_object_or_404(PurchaseHeader, number=pk)
 
-class SalesInvoiceListView(generic.ListView):
+class SalesInvoiceListView(generic.ListView, LoginRequiredMixin):
     model = SalesHeader
     paginate_by = 25
 
-class SalesInvoiceDetailView(generic.DetailView):
+class SalesInvoiceDetailView(generic.DetailView, LoginRequiredMixin):
     model = SalesHeader
     paginate_by = 25
 
-class ApprovalListView(generic.ListView):
+class ApprovalListView(generic.ListView, LoginRequiredMixin):
     model = ApprovalEntry
     paginate_by = 10
 
-class ApprovalDetailView(generic.DetailView):
+class ApprovalDetailView(generic.DetailView, LoginRequiredMixin):
     model = ApprovalEntry
     paginate_by =10
 
-class SalesCreditMemoListView(generic.ListView):
+class SalesCreditMemoListView(generic.ListView, LoginRequiredMixin):
     model = SalesCreditMemoHeader
     paginate_by = 25
 
-class SalesCreditMemoDetailView(generic.DetailView):
+class SalesCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
     model = SalesCreditMemoHeader
 
-class PurchaseCreditMemoListView(generic.ListView):
+class PurchaseCreditMemoListView(generic.ListView, LoginRequiredMixin):
     model = PurchaseCreditMemoHeader
     paginate_by = 25
 
-class PurchaseCreditMemoDetailView(generic.DetailView):
+class PurchaseCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
     model = PurchaseCreditMemoHeader
 
 class UnitCreateView(generic.edit.CreateView, LoginRequiredMixin):
@@ -126,16 +126,17 @@ class UnitCreateView(generic.edit.CreateView, LoginRequiredMixin):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
     
-class UnitListView(generic.ListView):
+class UnitListView(generic.ListView, LoginRequiredMixin):
     model = Unit
     paginate_by = 25
 
-class UnitDetailView(generic.DetailView):
+class UnitDetailView(generic.DetailView, LoginRequiredMixin):
     model = Unit
 
 class UnitUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
     model = Unit
     fields = ['description']
+
 
 
 def sales_order(request):
@@ -153,7 +154,8 @@ def sales_order(request):
                 line_instance.save()
 
             # Redirect to a success page or do something else
-            return redirect('invoices')
+            url = reverse_lazy('invoice-detail', args=[str(line_instance.number)])
+            return redirect(url)
 
     else:
         header_form = SalesHeaderForm(prefix='header')
@@ -165,6 +167,33 @@ def sales_order(request):
     }
     return render(request, 'inventory/sales_order.html', context)
 
+# def purchase_order(request):
+#     PurchaseLinesFormSet = forms.formset_factory(PurchaseLineForm, extra=1)
+
+#     if request.method == 'POST':
+#         header_form = PurchaseHeaderForm(request.POST, prefix='header')
+#         lines_formset = PurchaseLinesFormSet(request.POST, prefix='lines')
+
+#         if header_form.is_valid() and lines_formset.is_valid():
+#             header_instance = header_form.save()
+#             for form in lines_formset:
+#                 line_instance = form.save(commit=False)
+#                 line_instance.number = header_instance
+#                 line_instance.save()
+
+#             # Redirect to a success page or do something else
+#             return redirect('purchaseorders')
+
+#     else:
+#         header_form = PurchaseHeaderForm(prefix='header')
+#         lines_formset = PurchaseLinesFormSet(prefix='lines')
+
+#     context = {
+#         'header_form': header_form,
+#         'lines_formset': lines_formset,
+#     }
+#     return render(request, 'inventory/purchase_order.html', context)
+
 def purchase_order(request):
     PurchaseLinesFormSet = forms.formset_factory(PurchaseLineForm, extra=1)
 
@@ -174,13 +203,30 @@ def purchase_order(request):
 
         if header_form.is_valid() and lines_formset.is_valid():
             header_instance = header_form.save()
+
+            # Process the lines formset
             for form in lines_formset:
                 line_instance = form.save(commit=False)
                 line_instance.number = header_instance
-                line_instance.save()
+
+                # Check if the line_instance already exists
+                if line_instance.pk:  # If it has a primary key, it's an existing instance
+                    existing_line = PurchaseLine.objects.get(pk=line_instance.pk)
+                    # Update the existing line with the form data
+                    existing_line.item = line_instance.item
+                    existing_line.batch = line_instance.batch
+                    existing_line.quantity_requested = line_instance.quantity_requested
+                    existing_line.unit_price = line_instance.unit_price
+                    existing_line.expiry_date = line_instance.expiry_date
+                    existing_line.quantity_received = line_instance.quantity_received
+                    existing_line.invoice_no = line_instance.invoice_no
+                    existing_line.save()
+                else:
+                    line_instance.save()  # It's a new line, so save it
 
             # Redirect to a success page or do something else
-            return redirect('purchaseorders')
+            url = reverse_lazy("purchaseorder-detail", args=[str(line_instance.number)])
+            return redirect(url)
 
     else:
         header_form = PurchaseHeaderForm(prefix='header')
@@ -191,6 +237,7 @@ def purchase_order(request):
         'lines_formset': lines_formset,
     }
     return render(request, 'inventory/purchase_order.html', context)
+
 
 
 
