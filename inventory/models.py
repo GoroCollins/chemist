@@ -308,8 +308,12 @@ class PurchaseLine(models.Model):
                 cost=self.unit_price,
                 sale=self.unit_price * (1 + (self.markup/100))
             )
+        try:
+            super(PurchaseLine,self).save(*args, **kwargs)
+        except ValidationError as e:
+            raise e
 
-        super(PurchaseLine, self).save(*args, **kwargs)
+        #super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'{self.number}'

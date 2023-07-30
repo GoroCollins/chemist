@@ -2,14 +2,61 @@ from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponse, Http404
-from .models import Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine
+from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
+                     SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine)
 from django.views import generic
 from django.template import loader
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
-from . forms import SalesHeaderForm, SalesLinesForm, PurchaseHeaderForm, PurchaseLineForm
+from . forms import (SalesHeaderForm, SalesLinesForm, PurchaseHeaderForm, PurchaseLineForm, SalesLinesFormset)
 # Create your views here.
+
+class SalesHeaderInline():
+    form_class = SalesHeaderForm
+    model = SalesHeader
+    template_name = "inventory/sales_invoice_create_or_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('invoice-detail', args=[str(self.number)])
+        return redirect(url)
+    
+    def formset_saleslines_valid(self, formset):
+        saleslines = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for saleline in saleslines:
+            saleline.number = self.object
+            saleline.save()
+
+class SalesInvoiceCreate(LoginRequiredMixin, SalesHeaderInline, generic.edit.CreateView):
+    def get_context_data(self, **kwargs):
+        context = super(SalesInvoiceCreate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+    
+    def get_named_formsets(self):
+        if self.request.method == "GET":
+            return {
+                'saleslines': SalesLinesFormset(prefix='lines'),
+            }
+        else:
+            return {
+                'saleslines': SalesLinesFormset(self.request.POST or None, prefix='lines'),
+            }
 
 def index(request):
     """View function for home page of site."""

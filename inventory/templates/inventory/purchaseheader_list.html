@@ -7,7 +7,7 @@
     <a href="{% url 'purchaseorder-create' %}">Create Purchase Order</a>
     <ul>
         {% for lpo in purchaseheader_list %}
-        <li><a href="{{ lpo.get_absolute_url }}">{{lpo.number}}</a></li>
+        <li><a href="{{ lpo.get_absolute_url }}">{{lpo.number}}</a>&#124; {{lpo.vendor}}&#124; Ksh.{{lpo.total}}</li>
         {% endfor %}
     </ul>
         
