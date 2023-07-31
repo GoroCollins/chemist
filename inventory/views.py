@@ -58,6 +58,17 @@ class SalesInvoiceCreate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Cre
                 'saleslines': SalesLinesFormset(self.request.POST or None, prefix='lines'),
             }
 
+class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+
+    def get_named_formsets(self):
+        return {
+            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+        }
+
 def index(request):
     """View function for home page of site."""
 

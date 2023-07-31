@@ -23,15 +23,15 @@
         <div class="col-sm-2">
           {% block sidebar %}
             <ul class="sidebar-nav">
-              <li><a href="{% url 'index' %}">Home</a></li>
-              <li><a href="{%url 'units' %}">Units Of Measure</a></li>
-              <li><a href="{% url 'items' %}">Items</a></li>
-              <li><a href="{% url 'vendors' %}">Vendors</a></li>
-              <li><a href="{% url 'purchaseorders' %}">Purchase Orders</a></li>
-              <li><a href="{% url 'purchasememos' %}">Purchase Credit Memos</a></li>
-              <li><a href="{% url 'invoices' %}">Sales Invoices</a></li>
-              <li><a href="{% url 'salesmemos' %}">Sales Credit Memos</a></li>
-              <li><a href="{% url 'approvals' %}">Approvals</a></li>
+              <li><a href="{% url 'inventory:index' %}">Home</a></li>
+              <li><a href="{%url 'inventory:units' %}">Units Of Measure</a></li>
+              <li><a href="{% url 'inventory:items' %}">Items</a></li>
+              <li><a href="{% url 'inventory:vendors' %}">Vendors</a></li>
+              <li><a href="{% url 'inventory:purchaseorders' %}">Purchase Orders</a></li>
+              <li><a href="{% url 'inventory:purchasememos' %}">Purchase Credit Memos</a></li>
+              <li><a href="{% url 'inventory:invoices' %}">Sales Invoices</a></li>
+              <li><a href="{% url 'inventory:salesmemos' %}">Sales Credit Memos</a></li>
+              <li><a href="{% url 'inventory:approvals' %}">Approvals</a></li>
             </ul>
           {% endblock %}
         </div>

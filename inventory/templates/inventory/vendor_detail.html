@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>Vendor Card</h1>
-    <a href="{% url 'vendor-update' vendor.code %}">Update</a>
+    <a href="{% url 'inventory:vendor-update' vendor.code %}">Update</a>
     <ul>
         <li><strong>Code:</strong>{{vendor.code}}</li>
         <li><strong>Name:</strong>{{vendor.description}}</li>
@@ -26,7 +26,7 @@
         </tr>
         {% for lpo in vendor.vendor.all %}
         <tr>
-            <td><a href="{% url 'purchaseorder-detail' lpo.pk %}">{{lpo.number}}</a></td>
+            <td><a href="{% url 'inventory:purchaseorder-detail' lpo.pk %}">{{lpo.number}}</a></td>
             <td>{{lpo.date}}</td>
             <td>Ksh.{{lpo.total}}</td>
             <td>{{lpo.get_status_display}}</td>

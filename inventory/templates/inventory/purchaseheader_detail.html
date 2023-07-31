@@ -31,7 +31,7 @@
         {% for line in purchaseheader.lines.all %}
         <tr>
             <td>{{line.number}}</td>
-            <td><a href="{% url 'item-detail' line.item_id%}">{{line.item}}</a></td>
+            <td><a href="{% url 'inventory:item-detail' line.item_id%}">{{line.item}}</a></td>
             <td>{{line.batch}}</td>
             <td>{{line.quantity_requested}}</td>
             <td>{{line.unit_price}}</td>

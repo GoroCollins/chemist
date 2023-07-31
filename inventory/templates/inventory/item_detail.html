@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>Item Card</h1>
-    <a href="{% url 'item-update' item.code%}">Update</a>
+    <a href="{% url 'inventory:item-update' item.code%}">Update</a>
     <ul>
         <li><strong>Code:</strong>{{item.code}}</li>
         <li><strong>Name:</strong>{{item.description}}</li>

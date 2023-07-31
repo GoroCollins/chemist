@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>Unit Card</h1>
-    <a href="{% url 'unit-update' unit.code %}">Update</a>
+    <a href="{% url 'inventory:unit-update' unit.code %}">Update</a>
     <ul>
         <li><strong>Code:</strong>{{unit.code}}</li>
         <li><strong>Name:</strong>{{unit.description}}</li>

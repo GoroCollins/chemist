@@ -29,3 +29,4 @@ Implementation of views:
 7. Details to have sections with clickable section heads to reveal contents
 Testing
 1. Introduced a bug in lpo receiving: invoice number and batch are not being validated
+2. In sales invoice line: ensure to list only entries for the slected item

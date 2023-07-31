@@ -4,10 +4,10 @@
 {% endblock %}
 {% block content %}
     <h1>List of Units</h1>
-    <a href="{% url 'unit-add' %}">Create Unit Of Measure</a>
+    <a href="{% url 'inventory:unit-add' %}">Create Unit Of Measure</a>
     <ul>
         {% for unit in unit_list %}
-        <li><a href="{% url 'unit-detail' unit.pk %}">{{unit.code}}</a>&nbsp; {{unit.description}}&#124; <a href="{% url 'unit-update' unit.code %}">Edit</a></li>
+        <li><a href="{% url 'inventory:unit-detail' unit.pk %}">{{unit.code}}</a>&nbsp; {{unit.description}}&#124; <a href="{% url 'inventory:unit-update' unit.code %}">Edit</a></li>
         {% endfor %}
     </ul>
         

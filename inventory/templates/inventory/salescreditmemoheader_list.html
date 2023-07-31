@@ -6,7 +6,7 @@
     <h1>List of Sales Credit Memos</h1>
     <ul>
         {% for salesmemo in salescreditmemoheader_list %}
-        <li><a href="{{ salesmemo.get_absolute_url }}">{{salesmemo.number}}</a></li>
+        <li><a href="{% url 'inventory:salesmemo-detail' salesmemo.number %}">{{salesmemo.number}}</a></li>
         {% endfor %}
     </ul>
         
