@@ -387,6 +387,9 @@ def update_memo_total(sender, instance, created, **kwargs):
         purchase_memo.amount = total_amount or 0
         purchase_memo.save()
 
+class ItemEntryManager(models.Manager):
+    def for_item(self, item):
+        return self.filter(item=item)
 
 class ItemEntry(models.Model):
     entry_date = models.DateField(auto_now_add=True, editable=False)
@@ -399,6 +402,8 @@ class ItemEntry(models.Model):
     sale = models.FloatField()
     expiry_status = models.BooleanField(default=False)
     source_code = models.CharField(max_length=100)
+
+    objects = ItemEntryManager()
     @property
     def is_expired(self):
         '''Check expiry of items'''

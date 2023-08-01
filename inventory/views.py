@@ -31,7 +31,7 @@ class SalesHeaderInline():
                 formset_save_func(formset)
             else:
                 formset.save()
-        url = reverse_lazy('invoice-detail', args=[str(self.number)])
+        url = reverse_lazy('inventory:invoices')
         return redirect(url)
     
     def formset_saleslines_valid(self, formset):
