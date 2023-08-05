@@ -6,7 +6,7 @@
     <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
-            <h4 class="card-title">Add Sales Invoice</h4>
+            <h4 class="card-title">Sales Header</h4>
         </div>
         {% for field in form %}
             <div class="form-group card-body">
@@ -48,7 +48,7 @@
         </script>
         <div class="table-responsive card mt-4">
             <div class="card-header card-header-secondary">
-                <h4 class="card-title">Add Line</h4>
+                <h4 class="card-title">Sales Lines</h4>
             </div>
             <table class="table card-header">
                 <thead class="text-secondary">
@@ -77,35 +77,12 @@
                                     {% comment %} {{ field.DELETE }} {% endcomment %}
                                 </td>
                             {% endfor %}
-                            {% comment %} for delete {% endcomment %}
-                            {% if formss.instance.pk %}
-                                <td>
-                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal{{formss.instance.pk}}">
-                                        Delete
-                                    </button>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="exampleModal{{formss.instance.pk}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{formss.instance.pk}}" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel{{formss.instance.pk}}">Are Your Sure You Want To Delete This?</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                </td>            
-                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <a href="#" id="add-saleslines-button" class="btn btn-secondary add-saleslines">Add More</a> <!-- id="add-inlineformsetname-button" -->
+            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
+            <button id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</button>
         </div>
         
         {% endwith %}
@@ -121,7 +98,7 @@
 <script>
   $(document).ready(function() {
     // when user clicks add more btn of variants
-      $('.add-saleslines').click(function(ev) {
+      $('.add-lines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-saleslines').children().length;
           var tmplMarkup = $('#saleslines-template').html();
