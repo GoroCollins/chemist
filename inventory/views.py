@@ -9,65 +9,9 @@ from django.template import loader
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
-from . forms import (SalesHeaderForm, SalesLinesForm, PurchaseHeaderForm, PurchaseLineForm, SalesLinesFormset)
+from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset)
 # Create your views here.
 
-class SalesHeaderInline():
-    form_class = SalesHeaderForm
-    model = SalesHeader
-    template_name = "inventory/sales_invoice_create_or_update.html"
-
-    def form_valid(self, form):
-        named_formsets = self.get_named_formsets()
-        if not all((x.is_valid() for x in named_formsets.values())):
-            return self.render_to_response(self.get_context_data(form=form))
-        self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
-        for name, formset in named_formsets.items():
-            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
-            if formset_save_func is not None:
-                formset_save_func(formset)
-            else:
-                formset.save()
-        url = reverse_lazy('inventory:invoices')
-        return redirect(url)
-    
-    def formset_saleslines_valid(self, formset):
-        saleslines = formset.save(commit=False)
-        for obj in formset.deleted_objects:
-            obj.delete()
-        for saleline in saleslines:
-            saleline.number = self.object
-            saleline.save()
-
-class SalesInvoiceCreate(LoginRequiredMixin, SalesHeaderInline, generic.edit.CreateView):
-    def get_context_data(self, **kwargs):
-        context = super(SalesInvoiceCreate, self).get_context_data(**kwargs)
-        context['named_formsets'] = self.get_named_formsets()
-        return context
-    
-    def get_named_formsets(self):
-        if self.request.method == "GET":
-            return {
-                'saleslines': SalesLinesFormset(prefix='lines'),
-            }
-        else:
-            return {
-                'saleslines': SalesLinesFormset(self.request.POST or None, prefix='lines'),
-            }
-
-class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.UpdateView):
-    def get_context_data(self, **kwargs):
-        context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
-        context['named_formsets'] = self.get_named_formsets()
-        return context
-
-    def get_named_formsets(self):
-        return {
-            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
-        }
 
 def index(request):
     """View function for home page of site."""
@@ -146,6 +90,62 @@ class PurchaseHeaderDetailView(generic.DetailView, LoginRequiredMixin):
         pk = self.kwargs.get('pk')
         return get_object_or_404(PurchaseHeader, number=pk)
 
+class PurchaseHeaderInline():
+    form_class = PurchaseHeaderForm
+    model = PurchaseHeader
+    template_name = "inventory/purchase_order_create_or_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:purchaseorders')
+        return redirect(url)
+    
+    def formset_purchaselines_valid(self, formset):
+        purchaselines = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for purchaseline in purchaselines:
+            purchaseline.number = self.object
+            purchaseline.save()
+
+class PurchaseOrderCreate(LoginRequiredMixin, PurchaseHeaderInline, generic.edit.CreateView):
+    def get_context_data(self, **kwargs):
+        context = super(PurchaseOrderCreate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+    
+    def get_named_formsets(self):
+        if self.request.method == "GET":
+            return {
+                'purchaselines': PurchaseLineFormset(prefix='lines'),
+            }
+        else:
+            return {
+                'purchaselines': PurchaseLineFormset(self.request.POST or None, prefix='lines'),
+            }
+
+class PurchaseOrderUpdate(LoginRequiredMixin, PurchaseHeaderInline, generic.edit.UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super(PurchaseOrderUpdate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+
+    def get_named_formsets(self):
+        return {
+            'purchaselines': PurchaseLineFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+        }
 class SalesInvoiceListView(generic.ListView, LoginRequiredMixin):
     model = SalesHeader
     paginate_by = 25
@@ -153,6 +153,63 @@ class SalesInvoiceListView(generic.ListView, LoginRequiredMixin):
 class SalesInvoiceDetailView(generic.DetailView, LoginRequiredMixin):
     model = SalesHeader
     paginate_by = 25
+
+class SalesHeaderInline():
+    form_class = SalesHeaderForm
+    model = SalesHeader
+    template_name = "inventory/sales_invoice_create_or_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:invoices')
+        return redirect(url)
+    
+    def formset_saleslines_valid(self, formset):
+        saleslines = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for saleline in saleslines:
+            saleline.number = self.object
+            saleline.save()
+
+class SalesInvoiceCreate(LoginRequiredMixin, SalesHeaderInline, generic.edit.CreateView):
+    def get_context_data(self, **kwargs):
+        context = super(SalesInvoiceCreate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+    
+    def get_named_formsets(self):
+        if self.request.method == "GET":
+            return {
+                'saleslines': SalesLinesFormset(prefix='lines'),
+            }
+        else:
+            return {
+                'saleslines': SalesLinesFormset(self.request.POST or None, prefix='lines'),
+            }
+
+class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+
+    def get_named_formsets(self):
+        return {
+            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+        }
 
 class ApprovalListView(generic.ListView, LoginRequiredMixin):
     model = ApprovalEntry
@@ -168,6 +225,52 @@ class SalesCreditMemoListView(generic.ListView, LoginRequiredMixin):
 
 class SalesCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
     model = SalesCreditMemoHeader
+
+class SalesCreditMemoHeaderInline():
+    form_class = SalesCreditMemoHeaderForm
+    model = SalesCreditMemoHeader
+    template_name = "inventory/sales_memo_create_or_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:salesmemos')
+        return redirect(url)
+    
+    def formset_salesmemolines_valid(self, formset):
+        salesmemolines = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for salesmemoline in salesmemolines:
+            salesmemoline.number = self.object
+            salesmemoline.save()
+
+class SalesCreditMemoCreate(LoginRequiredMixin, SalesCreditMemoHeaderInline, generic.edit.CreateView):
+    def get_context_data(self, **kwargs):
+        context = super(SalesCreditMemoCreate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+    
+    def get_named_formsets(self):
+        if self.request.method == "GET":
+            return {
+                'salesmemolines': SalesCreditMemoLineFormset(prefix='lines'),
+            }
+        else:
+            return {
+                'salesmemolines': SalesCreditMemoLineFormset(self.request.POST or None, prefix='lines'),
+            }
 
 class PurchaseCreditMemoListView(generic.ListView, LoginRequiredMixin):
     model = PurchaseCreditMemoHeader
@@ -195,106 +298,6 @@ class UnitUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
     model = Unit
     fields = ['description']
 
-
-
-def sales_order(request):
-    SalesLinesFormSet = forms.formset_factory(SalesLinesForm, extra=1)
-
-    if request.method == 'POST':
-        header_form = SalesHeaderForm(request.POST, prefix='header')
-        lines_formset = SalesLinesFormSet(request.POST, prefix='lines')
-
-        if header_form.is_valid() and lines_formset.is_valid():
-            header_instance = header_form.save()
-            for form in lines_formset:
-                line_instance = form.save(commit=False)
-                line_instance.number = header_instance
-                line_instance.save()
-
-            # Redirect to a success page or do something else
-            url = reverse_lazy('invoice-detail', args=[str(line_instance.number)])
-            return redirect(url)
-
-    else:
-        header_form = SalesHeaderForm(prefix='header')
-        lines_formset = SalesLinesFormSet(prefix='lines')
-
-    context = {
-        'header_form': header_form,
-        'lines_formset': lines_formset,
-    }
-    return render(request, 'inventory/sales_order.html', context)
-
-# def purchase_order(request):
-#     PurchaseLinesFormSet = forms.formset_factory(PurchaseLineForm, extra=1)
-
-#     if request.method == 'POST':
-#         header_form = PurchaseHeaderForm(request.POST, prefix='header')
-#         lines_formset = PurchaseLinesFormSet(request.POST, prefix='lines')
-
-#         if header_form.is_valid() and lines_formset.is_valid():
-#             header_instance = header_form.save()
-#             for form in lines_formset:
-#                 line_instance = form.save(commit=False)
-#                 line_instance.number = header_instance
-#                 line_instance.save()
-
-#             # Redirect to a success page or do something else
-#             return redirect('purchaseorders')
-
-#     else:
-#         header_form = PurchaseHeaderForm(prefix='header')
-#         lines_formset = PurchaseLinesFormSet(prefix='lines')
-
-#     context = {
-#         'header_form': header_form,
-#         'lines_formset': lines_formset,
-#     }
-#     return render(request, 'inventory/purchase_order.html', context)
-
-def purchase_order(request):
-    PurchaseLinesFormSet = forms.formset_factory(PurchaseLineForm, extra=1)
-
-    if request.method == 'POST':
-        header_form = PurchaseHeaderForm(request.POST, prefix='header')
-        lines_formset = PurchaseLinesFormSet(request.POST, prefix='lines')
-
-        if header_form.is_valid() and lines_formset.is_valid():
-            header_instance = header_form.save()
-
-            # Process the lines formset
-            for form in lines_formset:
-                line_instance = form.save(commit=False)
-                line_instance.number = header_instance
-
-                # Check if the line_instance already exists
-                if line_instance.pk:  # If it has a primary key, it's an existing instance
-                    existing_line = PurchaseLine.objects.get(pk=line_instance.pk)
-                    # Update the existing line with the form data
-                    existing_line.item = line_instance.item
-                    existing_line.batch = line_instance.batch
-                    existing_line.quantity_requested = line_instance.quantity_requested
-                    existing_line.unit_price = line_instance.unit_price
-                    existing_line.expiry_date = line_instance.expiry_date
-                    existing_line.quantity_received = line_instance.quantity_received
-                    existing_line.invoice_no = line_instance.invoice_no
-                    existing_line.save()
-                else:
-                    line_instance.save()  # It's a new line, so save it
-
-            # Redirect to a success page or do something else
-            url = reverse_lazy("purchaseorder-detail", args=[str(line_instance.number)])
-            return redirect(url)
-
-    else:
-        header_form = PurchaseHeaderForm(prefix='header')
-        lines_formset = PurchaseLinesFormSet(prefix='lines')
-
-    context = {
-        'header_form': header_form,
-        'lines_formset': lines_formset,
-    }
-    return render(request, 'inventory/purchase_order.html', context)
 
 
 

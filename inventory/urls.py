@@ -18,7 +18,8 @@ urlpatterns = [
     path("item/<str:pk>/", views.ItemUpdateView.as_view(), name="item-update"),
     path('purchaseorders/', views.PurchaseHeaderListView.as_view(), name='purchaseorders'),
     path('purchaseorder-detail/<str:pk>/', views.PurchaseHeaderDetailView.as_view(), name='purchaseorder-detail'),
-    path("purchaseorder/add/", views.purchase_order, name="purchaseorder-create"),
+    path("purchaseorder/add/", views.PurchaseOrderCreate.as_view(), name="purchaseorder-create"),
+    path("purchase/<str:pk>/",views.PurchaseOrderUpdate.as_view(), name="purchaseorder-update"),
     path('purchasememos/', views.PurchaseCreditMemoListView.as_view(), name='purchasememos'),
     path('purchasememo-detail/<str:pk>', views.PurchaseCreditMemoDetailView.as_view(), name='purchasememo-detail'),
     path('invoices/', views.SalesInvoiceListView.as_view(), name='invoices'),
@@ -27,6 +28,7 @@ urlpatterns = [
     path("invoice/<str:pk>/",views.SalesInvoiceUpdate.as_view(), name="invoice-update"),
     path('salesmemos/', views.SalesCreditMemoListView.as_view(), name='salesmemos'),
     path('salesmemo-detail/<str:pk>', views.SalesCreditMemoDetailView.as_view(), name='salesmemo-detail'),
+    path("salesmemo/add/", views.SalesCreditMemoCreate.as_view(), name="salesmemo-create"),
     path('approvals/', views.ApprovalListView.as_view(), name='approvals'),
     path('approval-detail/<int:pk>/', views.ApprovalDetailView.as_view(), name='approval-detail'),
 ]

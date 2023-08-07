@@ -511,7 +511,7 @@ class SalesCreditMemoHeader(models.Model):
         verbose_name_plural = 'Sales Credit Memos'
 
 class SalesCreditMemoLine(models.Model):
-    number = models.ForeignKey(SalesCreditMemoHeader, on_delete=models.PROTECT, related_name='line', related_query_name='line')
+    number = models.ForeignKey(SalesCreditMemoHeader, on_delete=models.PROTECT, related_name='lines', related_query_name='lines')
     item = models.CharField(help_text='Item to return', max_length=100)
     sales_line = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='sales_line', related_query_name='sales_line')
     batch = models.CharField(help_text='Batch number to return', max_length=100)

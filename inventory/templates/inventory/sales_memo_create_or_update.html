@@ -6,7 +6,7 @@
     <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
-            <h4 class="card-title">Sales Header</h4>
+            <h4 class="card-title">Sales Credit Memo Header</h4>
         </div>
         {% for field in form %}
             <div class="form-group card-body">
@@ -32,11 +32,11 @@
     <!-- EXPLAINING with named_formsets.variants as formset -->
     <!-- Note: named_formsets is used in get_context_data function in views.py -->
     <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
-    {% with named_formsets.saleslines as formset %}
+    {% with named_formsets.salesmemolines as formset %}
         {{ formset.management_form }}
-        <script type="text/html" id="saleslines-template">  // id="inlineformsetname-template"
+        <script type="text/html" id="salesmemolines-template">  // id="inlineformsetname-template"
             // id='inlineformsetname-__prefix__' 
-            <tr id="saleslines-__prefix__" class= hide_all>
+            <tr id="salesmemolines-__prefix__" class= hide_all>
                 {% for fields in formset.empty_form.hidden_fields %}
                     {{ fields }}
                 {% endfor %}
@@ -48,24 +48,22 @@
         </script>
         <div class="table-responsive card mt-4">
             <div class="card-header card-header-secondary">
-                <h4 class="card-title">Sales Lines</h4>
+                <h4 class="card-title">Sales Credit Memo Lines</h4>
             </div>
             <table class="table card-header">
                 <thead class="text-secondary">
-                    <th>Item <span style="color: red;" class="required">*</span></th>
-                    <th>Item entry <span style="color: red;" class="required">*</span></th>
+                    <th>Sales Line <span style="color: red;" class="required">*</span></th>
                     <th>Quantity <span style="color: red;" class="required">*</span></th>
-                    <th>Discount <span style="color: red;" class="required">*</span></th>
                     <th>Delete?</th>
                 </thead>
-                <tbody id="item-saleslines">  <!-- id="item-inlineformsetname" -->
+                <tbody id="item-salesmemolines">  <!-- id="item-inlineformsetname" -->
                     <!-- formset non forms errors -->
                     {% for error in formset.non_form_errors %}
                         <span style="color: red">{{ error }}</span>
                     {% endfor %}
                     {% for formss in formset %}
                         {{ formss.management_form }}
-                        <tr id="saleslines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                        <tr id="salesmemolines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
                             {{ formss.id }}
                             {% for field in formss.visible_fields %}
                                 <td>
@@ -82,7 +80,7 @@
                 </tbody>
             </table>
             <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
-            <button id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</button>
+            <button id="add-salesmemolines-button" class="btn btn-secondary add-lines">Add More</button>
         </div>
         
         {% endwith %}
@@ -100,13 +98,13 @@
     // when user clicks add more btn of variants
       $('.add-lines').click(function(ev) {
           ev.preventDefault();
-          var count = $('#item-saleslines').children().length;
-          var tmplMarkup = $('#saleslines-template').html();
+          var count = $('#item-salesmemolines').children().length;
+          var tmplMarkup = $('#salesmemolines-template').html();
           var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
-          $('#item-saleslines').append(compiledTmpl);
+          $('#item-salesmemolines').append(compiledTmpl);
   
           // update form count
-          $('#id_saleslines-TOTAL_FORMS').attr('value', count+1);
+          $('#id_salesmemolines-TOTAL_FORMS').attr('value', count+1);
       });
   });
 </script>

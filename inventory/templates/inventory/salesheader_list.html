@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>List of Sales invoices</h1>
-    <a href="{% url 'inventory:invoice-create' %}">Add more invoice</a>
+    <a href="{% url 'inventory:invoice-create' %}">Create Sales invoice</a>
     <!-- <a href="{% url 'inventory:invoice-create' %}">Create Invoice</a> -->
     <ul>
         {% for invoice in salesheader_list %}
