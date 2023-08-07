@@ -351,7 +351,7 @@ class PurchaseCreditMemoHeader(models.Model):
         verbose_name_plural = "Purchase Credit Memos"
 
 class PurchaseCreditMemoLine(models.Model):
-    number = models.ForeignKey(PurchaseCreditMemoHeader, on_delete=models.PROTECT, related_name='line', related_query_name='line')
+    number = models.ForeignKey(PurchaseCreditMemoHeader, on_delete=models.PROTECT, related_name='lines', related_query_name='lines')
     item = models.CharField(max_length=100)
     purchase_line = models.ForeignKey(PurchaseLine, on_delete=models.PROTECT, related_name='purchase_line', related_query_name='purchase_line')
     batch = models.CharField(max_length=100)

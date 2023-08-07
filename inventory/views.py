@@ -9,7 +9,8 @@ from django.template import loader
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
-from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset)
+from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
+                     PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
 # Create your views here.
 
 
@@ -278,6 +279,52 @@ class PurchaseCreditMemoListView(generic.ListView, LoginRequiredMixin):
 
 class PurchaseCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
     model = PurchaseCreditMemoHeader
+
+class PurchaseCreditMemoHeaderInline():
+    form_class = PurchaseCreditMemoHeaderForm
+    model = PurchaseCreditMemoHeader
+    template_name = "inventory/purchase_memo_create_or_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:purchasememos')
+        return redirect(url)
+    
+    def formset_purchasememolines_valid(self, formset):
+        purchasememolines = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for purchasememoline in purchasememolines:
+            purchasememoline.number = self.object
+            purchasememoline.save()
+
+class PurchaseCreditMemoCreate(LoginRequiredMixin, PurchaseCreditMemoHeaderInline, generic.edit.CreateView):
+    def get_context_data(self, **kwargs):
+        context = super(PurchaseCreditMemoCreate, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
+    
+    def get_named_formsets(self):
+        if self.request.method == "GET":
+            return {
+                'purchasememolines': PurchaseCreditMemoLineFormset(prefix='lines'),
+            }
+        else:
+            return {
+                'purchasememolines': PurchaseCreditMemoLineFormset(self.request.POST or None, prefix='lines'),
+            }
 
 class UnitCreateView(generic.edit.CreateView, LoginRequiredMixin):
     model = Unit

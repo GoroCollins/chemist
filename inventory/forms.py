@@ -42,6 +42,18 @@ class SalesCreditMemoLineForm(forms.ModelForm):
 
 SalesCreditMemoLineFormset = forms.inlineformset_factory(SalesCreditMemoHeader, SalesCreditMemoLine, form=SalesCreditMemoLineForm, extra=1)
 
+class PurchaseCreditMemoHeaderForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseCreditMemoHeader
+        fields = ['vendor']
+
+class PurchaseCreditMemoLineForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseCreditMemoLine
+        fields = ['purchase_line','quantity']
+
+PurchaseCreditMemoLineFormset = forms.inlineformset_factory(PurchaseCreditMemoHeader, PurchaseCreditMemoLine, form=PurchaseCreditMemoLineForm, extra=1)
+
 
 
 

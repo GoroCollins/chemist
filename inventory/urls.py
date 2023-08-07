@@ -22,6 +22,7 @@ urlpatterns = [
     path("purchase/<str:pk>/",views.PurchaseOrderUpdate.as_view(), name="purchaseorder-update"),
     path('purchasememos/', views.PurchaseCreditMemoListView.as_view(), name='purchasememos'),
     path('purchasememo-detail/<str:pk>', views.PurchaseCreditMemoDetailView.as_view(), name='purchasememo-detail'),
+    path("purchasememos/add/", views.PurchaseCreditMemoCreate.as_view(), name='purchasememo-create'),
     path('invoices/', views.SalesInvoiceListView.as_view(), name='invoices'),
     path('invoice-detail/<str:pk>/', views.SalesInvoiceDetailView.as_view(), name='invoice-detail'),
     path("invoice/add/", views.SalesInvoiceCreate.as_view(), name='invoice-create'),

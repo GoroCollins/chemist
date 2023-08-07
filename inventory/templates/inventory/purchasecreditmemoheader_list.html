@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>List of Purchase Credit Memos</h1>
+    <a href="{% url 'inventory:purchasememo-create' %}">Create Purchase Credit Memo</a>
     <ul>
         {% for purchasememo in purchasecreditmemoheader_list %}
         <li><a href="{% url 'inventory:purchasememo-detail' purchasememo.number %}">{{purchasememo.number}}</a></li>
