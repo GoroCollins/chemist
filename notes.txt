@@ -1,15 +1,12 @@
-1. Implement returns through view or model forms.
 2. Create consolidated item entries capturing purchases, sales, and returns through a view.
 3. Add sales invoice finalize option on the front end.
 Implementation of views:
      Have a list of items as links to item details which can allow editing(View and template)
-       - give a link to item entries
          - give edit option to only update quantity with reasons.(View and form)
-     Have a list of vendors as a links to vendor details which can allow editing(View and template)
-       - editing vendor details (view and form)
      Have a list of purchase orders as links to details (receiving)(view and template)
-       - on this view give option to create LPO.(form)
-       - allow editing of open LPOs and viewing and printing for closed LPOs.
+       - allow editing of open LPOs.
+       - viewing and printing for approved LPOs.
+       - receiving approved LPOs.
        - Implement approvals for LPO.
        - Once approved cannot be editted and one can cancel approval and edit while open.
          - added status field with three options {0:'Open', 1:'Pending Approval', 2: 'Approved', 3:'Cancelled'}
@@ -24,15 +21,12 @@ Implementation of views:
   - handle logic in view: view for creating approval entry and one for approving the entries
   - explore notifications ny email
   - once approved update LPO header status using POST method through view and form
-5. Design the base html that will be extended
+5. Design the base html that will be extended - Done
 6. All lists to be tables without borders and primary link to be a link to the details
-7. Details to have sections with clickable section heads to reveal contents
+7. Details to have sections with clickable section heads to reveal contents - Done
 Testing
 1. Introduced a bug in lpo receiving: invoice number and batch are not being validated
 2. In sales invoice line: ensure to list only entries for the selected item
-3. In sales memo automatically pick customer from invoice selected and fill item, bacth, unit price from selected sales line and 
+3. In sales memo automatically pick customer from invoice selected and fill item, batch, unit price from selected sales line and 
    removed item_entry field from sales memo table
 4. For autofield fields look at how to show them dynamically on frontend
------------------------------Inline Formset----------------------------------
-Just try out the example the way it is on Thursday
----------------------------------------------------------------------------

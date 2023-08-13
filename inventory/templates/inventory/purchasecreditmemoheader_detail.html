@@ -12,4 +12,24 @@
         <li><strong>Created By:</strong>{{purchasecreditmemoheader.created_by}}</li>
     </ul>
     <h2>Purchase Credit Memo Lines</h2>
+    <table>
+        <tr>
+            <th>Purchase Credit Memo Number</th>
+            <th>Item</th>
+            <th>Batch</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        {% for line in purchasecreditmemoheader.lines.all %}
+        <tr>
+            <td>{{line.number}}</td>
+            <td>{{line.item}}</td>
+            <td>{{line.batch}}</td>
+            <td>{{line.unit_price}}</td>
+            <td>{{line.quantity}}</td>
+            <td>{{line.total}}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

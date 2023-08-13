@@ -1,7 +1,10 @@
+from typing import Any
+from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponse, Http404
+from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine)
 from django.views import generic
@@ -110,7 +113,7 @@ class PurchaseHeaderInline():
                 formset_save_func(formset)
             else:
                 formset.save()
-        url = reverse_lazy('inventory:purchaseorders')
+        url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
     def formset_purchaselines_valid(self, formset):
@@ -174,7 +177,7 @@ class SalesHeaderInline():
                 formset_save_func(formset)
             else:
                 formset.save()
-        url = reverse_lazy('inventory:invoices')
+        url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
     def formset_saleslines_valid(self, formset):
@@ -205,8 +208,29 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
     def get_context_data(self, **kwargs):
         context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
         context['named_formsets'] = self.get_named_formsets()
+        context['messages'] = messages.get_messages(self.request)
         return context
 
+    def get(self, request, *args, **kwargs):
+        # Call the parent get method to retrieve the object
+        self.object = self.get_object()
+        
+        # Check if the invoice has been finalized
+        if self.object.finalize == 1:
+            
+            # Display a message using the messages framework
+            invoice_number = self.object.number
+            print(f"Finalized Invoice Number: {invoice_number}") # for debugging
+            messages.warning(self.request, f"The invoice: {invoice_number} has been finalized.")
+            # context = self.get_context_data(**kwargs)
+            # context['messages'] = messages.get_messages(request)
+            # return self.render_to_response(context)
+            
+            # Redirect the user to the invoice-detail page
+            url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': invoice_number})
+            return redirect(url)
+        
+        return super().get(request, *args, **kwargs)
     def get_named_formsets(self):
         return {
             'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
@@ -246,7 +270,7 @@ class SalesCreditMemoHeaderInline():
                 formset_save_func(formset)
             else:
                 formset.save()
-        url = reverse_lazy('inventory:salesmemos')
+        url = reverse_lazy('inventory:salesmemo-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
     def formset_salesmemolines_valid(self, formset):
@@ -299,7 +323,7 @@ class PurchaseCreditMemoHeaderInline():
                 formset_save_func(formset)
             else:
                 formset.save()
-        url = reverse_lazy('inventory:purchasememos')
+        url = reverse_lazy('inventory:purchasememo-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
     def formset_purchasememolines_valid(self, formset):

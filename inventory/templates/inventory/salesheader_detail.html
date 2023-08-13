@@ -1,10 +1,18 @@
 {% extends "inventory/base.html" %}
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 {% block title %}
     Sales Invoice Details
 {% endblock %}
 {% block content %}
     <a href="{% url 'inventory:invoices' %}">Back</a>
     <h1>Sales Invoice Card</h1>
+    <a href="{% url 'inventory:invoice-update' salesheader.number %}">Edit</a>
     <ul>
         <li><strong>Number:</strong>{{salesheader.number}}</li>
         <li><strong>Customer:</strong>{{salesheader.customer}}</li>

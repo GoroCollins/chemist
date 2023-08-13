@@ -8,7 +8,7 @@
     <!-- <a href="{% url 'inventory:invoice-create' %}">Create Invoice</a> -->
     <ul>
         {% for invoice in salesheader_list %}
-        <li><a href="{% url 'inventory:invoice-detail' invoice.number %}">{{invoice.number}}</a>&#124; {{invoice.customer}}&#124; Ksh.{{invoice.amount}} | <a href="{% url 'inventory:invoice-update' invoice.number %}">Edit</a></li>
+        <li><a href="{% url 'inventory:invoice-detail' invoice.number %}">{{invoice.number}}</a>&#124; {{invoice.customer}}&#124; Ksh.{{invoice.amount}}</li>
         {% endfor %}
     </ul>
         
