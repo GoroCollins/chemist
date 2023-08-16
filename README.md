@@ -1,2 +1,2 @@
 # chemist
-A Django project for a chemist inventory system
+Inventory management system
