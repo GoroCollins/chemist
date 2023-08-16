@@ -210,6 +210,11 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
         context['named_formsets'] = self.get_named_formsets()
         context['messages'] = messages.get_messages(self.request)
         return context
+    def get_named_formsets(self):
+        return {
+            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+        }
+
 
     def get(self, request, *args, **kwargs):
         # Call the parent get method to retrieve the object
@@ -220,21 +225,27 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
             
             # Display a message using the messages framework
             invoice_number = self.object.number
-            print(f"Finalized Invoice Number: {invoice_number}") # for debugging
             messages.warning(self.request, f"The invoice: {invoice_number} has been finalized.")
-            # context = self.get_context_data(**kwargs)
-            # context['messages'] = messages.get_messages(request)
-            # return self.render_to_response(context)
+
+            # Clear messages after using them
+            messages.get_messages(self.request).used = True
             
             # Redirect the user to the invoice-detail page
             url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': invoice_number})
             return redirect(url)
+        formset = self.get_named_formsets()['saleslines']
+
+        for form in formset:
+            if form.instance.pk: # Check if the form represents an existing row
+                # print("Disabling fields for existing rows") 
+                # print(f"Field name: {[field_name for field_name in form.fields.keys()]}")
+                for field_name, field in form.fields.items():
+                    field.widget.attrs['disabled'] = True
+                    #field.disabled = True
+                    print(f'Form.fields:{form.fields[field_name].widget.attrs}')
+                    print(f"Disabled field: {field_name}, Widget: {field.widget}")
         
         return super().get(request, *args, **kwargs)
-    def get_named_formsets(self):
-        return {
-            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
-        }
 
 class ApprovalListView(generic.ListView, LoginRequiredMixin):
     model = ApprovalEntry

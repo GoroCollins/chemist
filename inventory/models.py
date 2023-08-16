@@ -457,7 +457,7 @@ class SalesLines(models.Model):
     batch = models.CharField(max_length=100, null=True)
     quantity = models.PositiveIntegerField()
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',  null=True)
-    unit_price = models.IntegerField(editable=False)
+    unit_price = models.FloatField(editable=False)
     total = models.FloatField(editable=False)
     discount = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=0, help_text="Allowed Precentage Discount")
 
