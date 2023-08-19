@@ -191,6 +191,7 @@ class Unit(models.Model):
         return self.description
     class Meta:
         verbose_name_plural ='Units Of Measure'
+        ordering = ['code']
     def get_absolute_url(self):
         return reverse('unit-detail', args=[str(self.code)])
 
