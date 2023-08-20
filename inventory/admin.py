@@ -5,7 +5,8 @@ admin.site.site_header = 'Chemist Administration'
 admin.site.index_title = 'Customization Interface'
 
 # Register your models here.
-from . models import Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry, SalesHeader, SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine
+from . models import (Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry,  SalesHeader, SalesLines, 
+                      SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalSetup)
 
 class UnitAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["code"]}), ('Unit information', {"fields": ["description"]}),]
@@ -103,3 +104,6 @@ class SalesCreditMemoInline(admin.StackedInline):
 class SalesCreditMemoHeaderAdmin(admin.ModelAdmin):
     inlines = [SalesCreditMemoInline]
 
+class ApprovalSetupAdmin(admin.ModelAdmin):
+    list_display = ('user', 'approver', 'modified_by')
+admin.site.register(ApprovalSetup, ApprovalSetupAdmin)

@@ -570,6 +570,26 @@ class ApprovalEntry(models.Model):
     class Meta:
         ordering = ["id"]
         verbose_name_plural = "Approval Entries"
+
+class ApprovalSetup(models.Model):
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='user', related_query_name='user')
+    approver = models.ForeignKey(User, on_delete=models.PROTECT, related_name='approver_id', related_query_name='approver_id')
+    modified_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='modifier_id', related_query_name='modifier_id', editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Approvals Setup'
+    def __str__(self) -> str:
+        return f"User:{self.user}   Approver:{self.approver}"
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and not user.pk:
+            user = None
+        if not self.pk:
+            self.modified_by = user
+        #self.modified_by = user
+        super(ApprovalSetup, self).save(*args, **kwargs)
+    
+    
         
 
 
