@@ -15,7 +15,8 @@ from django import forms
 from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
                      PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
 # Create your views here.
-
+def signup():
+    pass
 
 def index(request):
     """View function for home page of site."""

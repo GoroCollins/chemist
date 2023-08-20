@@ -3,6 +3,14 @@ from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from . models import (Item, ItemEntry, Unit, Vendor, PurchaseHeader, PurchaseLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, SalesHeader, 
                       SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine)
+# Usersignup
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+ 
+class SignUpForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'password1', 'password2', )
 
 
 class SalesHeaderForm(forms.ModelForm):

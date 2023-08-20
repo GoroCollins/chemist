@@ -388,9 +388,6 @@ def update_memo_total(sender, instance, created, **kwargs):
         purchase_memo.amount = total_amount or 0
         purchase_memo.save()
 
-class ItemEntryManager(models.Manager):
-    def for_item(self, item):
-        return self.filter(item=item)
 
 class ItemEntry(models.Model):
     entry_date = models.DateField(auto_now_add=True, editable=False)
@@ -404,7 +401,6 @@ class ItemEntry(models.Model):
     expiry_status = models.BooleanField(default=False)
     source_code = models.CharField(max_length=100)
 
-    objects = ItemEntryManager()
     @property
     def is_expired(self):
         '''Check expiry of items'''
@@ -588,6 +584,14 @@ class ApprovalSetup(models.Model):
             self.modified_by = user
         #self.modified_by = user
         super(ApprovalSetup, self).save(*args, **kwargs)
+# @receiver(post_save, sender=User)
+# def create_user_approval(sender, instance, created, **kwargs):
+#     if created:
+#         ApprovalSetup.objects.create(user=instance)
+
+# @receiver(post_save, sender=User)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.profile.save()
     
     
         
