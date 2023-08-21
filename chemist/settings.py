@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_registration',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +152,6 @@ EMAIL_FILE_PATH = "/tmp/app-messages"
 # EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 # EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 # EMAIL_USE_TLS = True
+
+ACCOUNT_ACTIVATION_DAYS = 7 
+# REGISTRATION_OPEN = False # Used to close registration

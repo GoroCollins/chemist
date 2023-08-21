@@ -23,6 +23,6 @@ urlpatterns = [
     path('inventory/', include('inventory.urls')),
     path('', RedirectView.as_view(url='/inventory/', permanent=True)),# '' implies '/'
     path('admin/', admin.site.urls),
+    path("accounts/", include("django_registration.backends.activation.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
-    path("signup/", views.signup, name='signup'),
 ]
