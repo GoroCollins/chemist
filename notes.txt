@@ -30,3 +30,4 @@ Testing
 3. In sales memo automatically pick customer from invoice selected and fill item, batch, unit price from selected sales line and 
    removed item_entry field from sales memo table
 4. For autofield fields look at how to show them dynamically on frontend
+5. Use @cached_property

@@ -8,4 +8,7 @@ table, th, td {
 table {
     width:100%;
 }
+footer {
+    text-align: center;
+}
 /* Responsive design: Flebox, Bootstrap SASS is good for styling  */

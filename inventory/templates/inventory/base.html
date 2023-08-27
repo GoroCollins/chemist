@@ -37,9 +37,9 @@
           
              {% if user.is_authenticated %}
                <li>User: {{ user.get_username }}</li>
-               <li><a href="{% url 'logout' %}?next={{ request.path }}">Logout</a></li>
+               <li><a href="{% url 'account_logout' %}?next={{ request.path }}">Logout</a></li>
              {% else %}
-               <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
+               <li><a href="{% url 'account_login' %}?next={{ request.path }}">Login</a></li>
              {% endif %}
             </ul>
           
@@ -49,5 +49,5 @@
       </div>
     </div>
   </body>
-  <footer><center>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</center></footer>
+  <footer>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</footer>
 </html>
