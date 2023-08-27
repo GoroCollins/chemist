@@ -14,7 +14,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
 from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
                      PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def index(request):
     """View function for home page of site."""
 

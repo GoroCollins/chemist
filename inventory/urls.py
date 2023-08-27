@@ -1,9 +1,11 @@
 from django.urls import path 
+from allauth.account.views import SignupView
 from . import views
 app_name = "inventory"
 
 urlpatterns = [
-    path("", views.index, name='index'),
+    path("", SignupView.as_view(), name='index'),
+    path("home/", views.index, name='home'),
     path("units/", views.UnitListView.as_view(), name='units'),
     path("unit-detail/<str:pk>/", views.UnitDetailView.as_view(), name='unit-detail'),
     path("unit/add/", views.UnitCreateView.as_view(), name='unit-add'),
