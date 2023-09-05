@@ -48,6 +48,76 @@
         <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
       </div>
     </div>
+    <div class="header">
+      <nav>
+          <img src="{%static 'images/logo.png'%}" alt="" class="logo">
+          <ul>
+              <li><a href="{%url 'home-page'%}">Home</a></li>
+              <li><a href="#">Products</a></li>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
+          </ul>
+          {% if user.is_authenticated %}
+          {% if request.user.profile.profile_image %}
+          <img src="{{ request.user.profile.profile_image.url}}" alt="" class="profile-user-pic"
+              onclick="toggleMenu()">
+          {% else %}
+          <img src="{% static 'images/mypic.png' %}" alt="Default Image" class="profile-user-pic"
+              onclick="toggleMenu()">
+          {% endif %}
+          <div class="profile-sub-menu-wrap" id="profile-subMenu">
+              <div class="profile-sub-menu">
+                  <div class="profile-user-info">
+                      {% if request.user.profile.profile_image %}
+                      <img src="{{ request.user.profile.profile_image.url}}" alt="">
+                      {% else %}
+                      <img src="{% static 'images/mypic.png' %}" alt="Default Image">
+                      {% endif %}
+                      <h3>{{ request.user.profile.full_name }}</h3>
+                      <h5>{{ request.user.profile.designation }}</h5>
+                  </div>
+                  <hr>
+    
+                  <a href="{%url 'user-profile'%}" class="profile-sub-menu-link">
+                      <img src="{% static 'images/profile.png' %}">
+                      </img>
+                      <p>Edit Profile</p>
+                  </a>
+    
+                  <a href="" class="profile-sub-menu-link">
+                      <img src="{% static 'images/setting.png' %}">
+                      </img>
+                      <p>Setting & Privacy</p>
+                  </a>
+    
+                  <a href="" class="profile-sub-menu-link">
+                      <img src="{% static 'images/help.png' %}">
+                      </img>
+                      <p>Help & Support</p>
+    
+                  </a>
+    
+                  <a href="{%url 'logout'%}" class="profile-sub-menu-link">
+                      <img src="{% static 'images/logout.png' %}">
+                      </img>
+                      <p>Logout</p>
+    
+                  </a>
+    
+              </div>
+          </div>
+          {% else %}
+          <div class="register-login-menu">
+              <a href="{% url 'login' %}" class="menu-link">Login</a>
+              <span class="menu-separator">|</span>
+              <a href="{% url 'register' %}" class="menu-link">Register</a>
+          </div>
+          {% endif %}
+      </nav>
+      {% block content %}
+      {% endblock %}
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
   </body>
   <footer>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</footer>
 </html>

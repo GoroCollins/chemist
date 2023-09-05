@@ -12,3 +12,267 @@ footer {
     text-align: center;
 }
 /* Responsive design: Flebox, Bootstrap SASS is good for styling  */
+
+.profile-page{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding-top: 20px;
+}
+.profile-container{
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 500px;
+  height: 200px;
+  border-radius: 20px;
+  box-shadow: 0 6px 12px rgba(30,10,58,.04);
+}
+.profile-container-pic{
+    margin-left: 60px;
+}
+.profile-container-pic img{
+    width:100px; 
+    height:100px
+}
+.profile-details{
+    width: 200px;
+    height:150px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+.profile-details hr{
+    border: 0;
+    height: 1px;
+    background:#ccc;
+    margin: 15px 0 10px;
+}
+
+.mobile{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: max-content;
+    margin-top: 5px;
+}
+
+.mobile img {
+ margin-right: 5px;
+}
+
+
+.email{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: max-content;
+    margin-top: 5px;
+}
+
+.email img {
+    margin-right: 5px;
+   }
+
+   .home{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: max-content;
+    margin-top: 5px;
+}
+
+.home img {
+    margin-right: 5px;
+   }
+
+
+.profile-form {
+    width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.profile-form label {
+    display: block;
+    margin-bottom: 10px;
+    color: black;
+}
+.profile-form input[type="text"], .profile-form input[type="email"], .profile-form input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.profile-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+.profile-form button {
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.profile-form button:hover {
+    background-color: #0056b3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Popins', sans-serif;
+}
+
+.header {
+    width: 100%;
+    min-height: 100vh;
+    background: #4477CE;
+    color: #525252;
+}
+
+nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10%;
+    background: #1a1a1a1a;
+    position: relative;
+}
+
+.logo {
+    width: 120px;
+}
+
+.profile-user-pic {
+    width: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 30px;
+}
+
+nav ul {
+    width: 100%;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline-block;
+    list-style: none;
+    margin: 10px 20px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.profile-sub-menu-wrap {
+    position: absolute;
+    top: 100%;
+    right: 10%;
+    width: 320px;
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.5s;
+}
+
+.profile-sub-menu-wrap.open-menu {
+    max-height: 400px;
+}
+
+.profile-sub-menu {
+    background: #8CABFF;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.profile-user-info {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.profile-user-info h3 {
+    font-weight: 500;
+}
+
+.profile-user-info h5 {
+    font-weight: 500;
+    top: 65%;
+    position: absolute;
+    left: 29%;
+}
+
+.profile-user-info img {
+    width: 60px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.profile-sub-menu hr {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 15px 0 10px;
+}
+
+.profile-sub-menu-link img {
+    width: 24px;
+    height: 24px;
+    background-color: #e5e5e5;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.profile-sub-menu-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #525252;
+    margin: 12px 0;
+}
+
+.profile-sub-menu-link p {
+    width: 100%;
+}
+
+.register-login-menu {
+    display: flex;
+    align-items: center;
+    background-color: #4477CE;  
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+.menu-link {
+    text-decoration: none;
+    color: #fff;  
+    font-weight: bold;
+    margin: 0 10px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+}
+
+.menu-link:hover {
+    background-color: #365a9c;  
+    color: #fff;
+}
+
+.menu-separator {
+    margin: 0 5px;
+    color: #fff;
+}

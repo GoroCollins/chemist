@@ -16,5 +16,5 @@ def greeting(value):
     elif 17 <= current_hour < 20:
         time_category = "evening"
     else:
-        time_category = "night"
+        time_category = "evening"
     return f"Good {time_category}"

@@ -1,6 +1,8 @@
 from django.urls import path 
 from allauth.account.views import SignupView
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 app_name = "inventory"
 
 urlpatterns = [
@@ -35,3 +37,6 @@ urlpatterns = [
     path('approvals/', views.ApprovalListView.as_view(), name='approvals'),
     path('approval-detail/<int:pk>/', views.ApprovalDetailView.as_view(), name='approval-detail'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,7 +7,7 @@ admin.site.index_title = 'Customization Interface'
 
 # Register your models here.
 from . models import (Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry,  SalesHeader, SalesLines, 
-                      SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalSetup)
+                      SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalSetup, Profile)
 
 class UnitAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["code"]}), ('Unit information', {"fields": ["description"]}),]
@@ -108,6 +108,8 @@ class SalesCreditMemoHeaderAdmin(admin.ModelAdmin):
 class ApprovalSetupAdmin(admin.ModelAdmin):
     list_display = ('user', 'approver', 'modified_by')
 admin.site.register(ApprovalSetup, ApprovalSetupAdmin)
+
+admin.site.register(Profile)
 # Define an inline admin descriptor for Employee model
 # which acts a bit like a singleton
 # class EmployeeInline(admin.StackedInline):
