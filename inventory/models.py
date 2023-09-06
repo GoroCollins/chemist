@@ -604,6 +604,9 @@ class Profile(models.Model):
     state = models.CharField(max_length=100, null= True)
     country = models.CharField(max_length=100, null= True)
 
+    def __str__(self) -> str:
+        return f"{self.full_name}'s profile"
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

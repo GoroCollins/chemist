@@ -137,7 +137,7 @@ footer {
 .header {
     width: 100%;
     min-height: 100vh;
-    background: #4477CE;
+    /* background: #4477CE; */
     color: #525252;
 }
 
@@ -147,7 +147,7 @@ nav {
     align-items: center;
     justify-content: space-between;
     padding: 10px 10%;
-    background: #1a1a1a1a;
+    /* background: #1a1a1a1a; */
     position: relative;
 }
 
