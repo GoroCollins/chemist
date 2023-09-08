@@ -98,7 +98,7 @@
               <li><a href="{% url 'inventory:salesmemos' %}">Sales Credit Memos</a></li>
               <li><a href="{% url 'inventory:approvals' %}">Approvals</a></li>
             </ul>
-            <ul class="sidebar-nav">
+            <!-- <ul class="sidebar-nav">
           
              {% if user.is_authenticated %}
                <li>User: {{ user.get_username }}</li>
@@ -106,7 +106,7 @@
              {% else %}
                <li><a href="{% url 'account_login' %}?next={{ request.path }}">Login</a></li>
              {% endif %}
-            </ul>
+            </ul> -->
           
           {% endblock %}
 
