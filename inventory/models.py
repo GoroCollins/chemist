@@ -9,6 +9,7 @@ import datetime
 from django.urls import reverse
 from django.core.validators import MaxValueValidator
 from django.contrib.auth.models import User
+from PIL import Image
 
 # Custom fieldtype
 import re
@@ -598,7 +599,7 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=50, null= True)
     designation = models.CharField(max_length=100, null= True)
     mobile_number = models.CharField(max_length=20, null=True)
-    profile_image = models.ImageField(null=True, upload_to='static/images/' )
+    profile_image = models.ImageField(default='profile.png',upload_to='profiles/')
     profile_summary = models.TextField(max_length=300, null= True)
     city = models.CharField(max_length=100, null= True)
     state = models.CharField(max_length=100, null= True)
@@ -606,6 +607,16 @@ class Profile(models.Model):
 
     def __str__(self) -> str:
         return f"{self.full_name}'s profile"
+    def save(self, *args, **kwargs):
+        super().save()
+        #super(Profile, self).save(*args, **kwargs)
+
+        img = Image.open(self.profile_image.path)
+
+        if img.height > 100 or img.width > 100:
+            new_img = (100, 100)
+            img.thumbnail(new_img)
+            img.save(self.profile_image.path)
 
 
 @receiver(post_save, sender=User)

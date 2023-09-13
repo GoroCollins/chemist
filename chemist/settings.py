@@ -162,6 +162,7 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = 'e-Chemist:'
 ACCOUNT_EMAIL_REQUIRED=True
 ACCOUNT_CHANGE_EMAIL=True
 ACCOUNT_EMAIL_VERIFICATION='mandatory'
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 
 
 SITE_ID = 2
@@ -171,6 +172,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # OR 
+MEDIA_ROOT = BASE_DIR / 'media'
 
-MEDIA_URL = '/images/'
+MEDIA_URL = '/media/'

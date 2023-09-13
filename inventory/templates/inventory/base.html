@@ -18,7 +18,7 @@
   <body>
     <div class="header">
       <nav>
-        <img src="{%static 'images/logo.png'%}" alt="" class="logo">
+        <!-- <img src="{%static 'inventory/images/logo.png'%}" alt="" class="logo"> -->
         <ul>
             <li><a href="{% url 'inventory:index' %}">Home</a></li>
             <li><a href="{%url 'inventory:units' %}">Units Of Measure</a></li>
@@ -26,15 +26,13 @@
             <li><a href="{% url 'inventory:vendors' %}">Vendors</a></li>
             <li><a href="{% url 'inventory:purchaseorders' %}">Purchase Orders</a></li>
             <li><a href="{% url 'inventory:invoices' %}">Sales Invoices</a></li>
-            <li><a href="{% url 'inventory:approvals' %}">Approvals</a></li>
         </ul>
         {% if user.is_authenticated %}
         {% if request.user.profile.profile_image %}
-        <img src="{{ request.user.profile.profile_image.url}}" alt="" class="profile-user-pic"
-            onclick="toggleMenu()">
+        <!-- The code snippet is an HTML image tag that displays the profile picture of the authenticated user. It also has an onclick event that triggers the "toggleMenu()" function. -->
+        <img src="{{ request.user.profile.profile_image.url }}" alt="" class="profile-user-pic" onclick="toggleMenu()">
         {% else %}
-        <img src="{% static 'images/mypic.png' %}" alt="Default Image" class="profile-user-pic"
-            onclick="toggleMenu()">
+        <img src="{% static 'inventory/images/mypic.png' %}" alt="Default Image" class="profile-user-pic" onclick="toggleMenu()">
         {% endif %}
         <div class="profile-sub-menu-wrap" id="profile-subMenu">
             <div class="profile-sub-menu">
@@ -42,38 +40,35 @@
                     {% if request.user.profile.profile_image %}
                     <img src="{{ request.user.profile.profile_image.url}}" alt="">
                     {% else %}
-                    <img src="{% static 'images/mypic.png' %}" alt="Default Image">
+                    <img src="{% static 'inventory/images/mypic.png' %}" alt="Default Image">
                     {% endif %}
                     <h3>{{ request.user.profile.full_name }}</h3>
                     <h5>{{ request.user.profile.designation }}</h5>
                 </div>
-                <hr>
+                <hr> <!-- separates image & details from edit and settings-->
   
                 <a href="{%url 'inventory:user-profile'%}" class="profile-sub-menu-link">
-                    <img src="{% static 'images/profile.png' %}">
-                    </img>
+                    <img src="{% static 'inventory/images/profile.png' %}"></img>
                     <p>Edit Profile</p>
                 </a>
   
-                <a href="" class="profile-sub-menu-link">
-                    <img src="{% static 'images/setting.png' %}">
-                    </img>
+                <!-- <a href="" class="profile-sub-menu-link">
+                    <img src="{% static 'inventory/images/setting.png' %}"></img>
                     <p>Setting & Privacy</p>
                 </a>
   
                 <a href="" class="profile-sub-menu-link">
-                    <img src="{% static 'images/help.png' %}">
-                    </img>
+                    <img src="{% static 'inventory/images/help.png' %}"></img>
                     <p>Help & Support</p>
   
-                </a>
+                </a> -->
   
                 <a href="{%url 'account_logout'%}" class="profile-sub-menu-link">
-                    <img src="{% static 'images/logout.png' %}">
-                    </img>
+                    <img src="{% static 'inventory/images/logout.png' %}"></img>
                     <p>Logout</p>
   
                 </a>
+                <a href="{%url 'account_change_password' %}" class="profile-sub-menu-link">Change password</a>
   
             </div>
         </div>
@@ -114,7 +109,7 @@
         <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
       </div>
     </div>
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'inventory/script.js' %}"></script>
   </body>
   <footer>&copy;{% now 'Y' %}, ThinkTech Solutions<br>All rights reserved</footer>
 </html>

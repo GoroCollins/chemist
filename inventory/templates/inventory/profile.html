@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{%static 'css/profile.css' %}">
+<link rel="stylesheet" href="{%static 'inventory/profile.css' %}">
 
 <div class="profile-page">
     <div class="profile-container">
@@ -10,7 +10,7 @@
             {% if request.user.profile.profile_image %}
             <img src="{{ request.user.profile.profile_image.url}}" alt="Profile Image">
             {% else %}
-            <img src="{% static 'images/mypic.png' %}" alt="Default Image">
+            <img src="{% static 'inventory/images/mypic.png' %}" alt="Default Image">
             {% endif %}
         </div>
         <div class="profile-details">
@@ -19,17 +19,17 @@
             <hr>
             <div class="text">
                 <div class="mobile">
-                    <img src="{% static 'images/phone.png' %}" alt="">
+                    <img src="{% static 'inventory/images/phone.png' %}" alt="">
                     <h5>{{ request.user.profile.mobile_number }}</h5>
                 </div>
 
                 <div class="email">
-                    <img src="{% static 'images/email.png' %}" alt="">
+                    <img src="{% static 'inventory/images/email.png' %}" alt="">
                     <h5>{{ request.user.email }}</h5>
                 </div>
 
                 <div class="home">
-                    <img src="{% static 'images/house.png' %}" alt="">
+                    <img src="{% static 'inventory/images/house.png' %}" alt="">
                     <h5>{{ request.user.profile.city }}, {{ request.user.profile.state }},
                         {{request.user.profile.country }}</h5>
 
