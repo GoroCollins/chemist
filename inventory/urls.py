@@ -35,6 +35,8 @@ urlpatterns = [
     path("salesmemo/add/", views.SalesCreditMemoCreate.as_view(), name="salesmemo-create"),
     path('approvals/', views.ApprovalListView.as_view(), name='approvals'),
     path('approval-detail/<int:pk>/', views.ApprovalDetailView.as_view(), name='approval-detail'),
+    path('approval/<str:pk>/', views.ApprovalUpdateView.as_view(), name="approval-update"),
+    path('create-approval/', views.create_approval_request, name="create-approval"),
     path('profile/', views.UserProfile.as_view(), name='user-profile' ),
 ]
 

@@ -31,3 +31,12 @@ Testing
    removed item_entry field from sales memo table
 4. For autofield fields look at how to show them dynamically on frontend
 5. Use @cached_property
+6. Use templates for enforcing permissions: look at UserPassesTestMixin mixin
+7. ModelChoiceFilter - for filtering the lists
+-----------------------------------------Retrieve Approval button value---------------------
+if (request.method == "POST):
+   if (request.POST.get('btn-1', False)):
+       new_value_button = ValueButtons(value=request.POST.get(
+'btn-1'))
+       new_value_button.save()
+----------------------------------------------------------------------

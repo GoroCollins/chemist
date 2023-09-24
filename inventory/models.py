@@ -8,8 +8,10 @@ from django.core.exceptions import ValidationError
 import datetime
 from django.urls import reverse
 from django.core.validators import MaxValueValidator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from PIL import Image
+from django.contrib.auth import get_user_model # check it's usage
+from django.contrib.contenttypes.models import ContentType
 
 # Custom fieldtype
 import re
@@ -194,7 +196,7 @@ class Unit(models.Model):
         verbose_name_plural ='Units Of Measure'
         ordering = ['code']
     def get_absolute_url(self):
-        return reverse('unit-detail', args=[str(self.code)])
+        return reverse('inventory:unit-detail', args=[str(self.code)])
 
 class Item(models.Model):
     code = models.CharField('Item Code', max_length=20, primary_key=True)
@@ -205,7 +207,7 @@ class Item(models.Model):
         return self.description
     def get_absolute_url(self):
         """Returns the url to access a particular item instance"""
-        return reverse('item-detail', args=[str(self.code)])
+        return reverse('inventory:item-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Items'
         ordering = ["code"]
@@ -222,7 +224,7 @@ class Vendor(models.Model):
         return self.description
     def get_absolute_url(self):
         """Returns url to access a particular vendor instance"""
-        return reverse('vendor-detail', args=[str(self.code)])
+        return reverse('inventory:vendor-detail', args=[str(self.code)])
     class Meta:
         verbose_name_plural = 'Vendors'
         ordering = ["code"]
@@ -253,7 +255,7 @@ class PurchaseHeader(models.Model):
     def __str__(self) -> str:
         return self.number
     def get_absolute_url(self):
-        return reverse('purchaseorder-detail', args=[str(self.number)])
+        return reverse('inventory:purchaseorder-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Purchase Orders'
         ordering = ["number"]
@@ -347,7 +349,7 @@ class PurchaseCreditMemoHeader(models.Model):
     def __str__(self) -> str:
         return f'{self.number}'
     def get_absolute_url(self):
-        return reverse('purchasememo-detail', args=[str(self.number)])
+        return reverse('inventory:purchasememo-detail', args=[str(self.number)])
     class Meta:
         ordering = ["number"]
         verbose_name_plural = "Purchase Credit Memos"
@@ -444,7 +446,7 @@ class SalesHeader(models.Model):
     def __str__(self) -> str:
         return self.number
     def get_absolute_url(self):
-        return reverse('invoice-detail', args=[str(self.number)])
+        return reverse('inventory:invoice-detail', args=[str(self.number)])
     class Meta:
         verbose_name_plural = 'Sales Invoices'
         ordering = ["number"]
@@ -502,7 +504,7 @@ class SalesCreditMemoHeader(models.Model):
         return f'{self.number}'
     
     def get_absolute_url(self):
-        return reverse('salesmemo-detail', args=[str(self.number)])
+        return reverse('inventory:salesmemo-detail', args=[str(self.number)])
     
     class Meta:
         ordering = ["number"]
@@ -558,11 +560,19 @@ class ApprovalEntry(models.Model):
     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='modifier', related_query_name='modifier',editable=False)
     due_date = models.DateField(default=timezone.now)
     overdue = models.BooleanField(default=False)
+    reason = models.CharField(max_length=200, null=True)
 
     def __str__(self) -> str:
         return f'{self.requester}-{self.document_number}: {self.details}'
+    @property
+    def is_overdue(self):
+        return datetime.today - self.request_date < 5
+    def save(self, *args, **kwargs):
+        self.overdue = self.is_overdue
+        self.details = "Amount: " + self.amount + "LPO Number: " + self.document_number
+        super(ApprovalEntry, self).save(*args, **kwargs)
     def get_absolute_url(self):
-        return reverse('approval-detail', args=[str(self.id)])
+        return reverse('inventory:approval-detail', args=[str(self.id)])
     
     class Meta:
         ordering = ["id"]

@@ -3,20 +3,21 @@ from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
-                     SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine)
+                     SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile)
 from django.views import generic, View
 from django.template import loader
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django import forms
 from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
                      PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
 from django.contrib.auth.decorators import login_required
-from .models import Profile
 from django.core.files.base import ContentFile
+import reportlab
+
 
 @login_required
 def index(request):
@@ -44,15 +45,15 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'inventory/index.html', context=context)
-class VendorListView(generic.ListView, LoginRequiredMixin):
+class VendorListView(LoginRequiredMixin, generic.ListView):
     model = Vendor
     paginate_by = 25
 
-class VendorDetailView(generic.DetailView, LoginRequiredMixin):
+class VendorDetailView(LoginRequiredMixin, generic.DetailView):
     model = Vendor
     paginate_by = 25
 
-class VendorCreateView(generic.edit.CreateView, LoginRequiredMixin):
+class VendorCreateView(LoginRequiredMixin, generic.edit.CreateView):
     model = Vendor
     fields = ['description', 'contact_email', 'contact_phone', 'address', 'kra_pin']
     success_url = reverse_lazy("vendors")
@@ -60,19 +61,19 @@ class VendorCreateView(generic.edit.CreateView, LoginRequiredMixin):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
-class VendorUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
+class VendorUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Vendor
     fields = ['contact_email', 'contact_phone', 'address']
 
-class ItemListView(generic.ListView, LoginRequiredMixin):
+class ItemListView(LoginRequiredMixin, generic.ListView):
     model = Item
     paginate_by = 25
 
-class ItemDetailView(generic.DetailView, LoginRequiredMixin):
+class ItemDetailView(LoginRequiredMixin, generic.DetailView):
     model = Item
     paginate_by = 25
 
-class ItemCreateView(generic.edit.CreateView, LoginRequiredMixin):
+class ItemCreateView(LoginRequiredMixin, generic.edit.CreateView):
     model = Item
     fields = ['code','description', 'unit']
     success_url = reverse_lazy("items")
@@ -80,15 +81,15 @@ class ItemCreateView(generic.edit.CreateView, LoginRequiredMixin):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
-class ItemUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
+class ItemUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Item
     fields = ['unit']
 
-class PurchaseHeaderListView(generic.ListView, LoginRequiredMixin):
+class PurchaseHeaderListView(LoginRequiredMixin, generic.ListView):
     model = PurchaseHeader
     paginate_by = 25
 
-class PurchaseHeaderDetailView(generic.DetailView, LoginRequiredMixin):
+class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
     model = PurchaseHeader
     template_name = 'inventory/purchaseheader_detail.html'  # Ensure correct template name
 
@@ -152,11 +153,11 @@ class PurchaseOrderUpdate(LoginRequiredMixin, PurchaseHeaderInline, generic.edit
         return {
             'purchaselines': PurchaseLineFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
         }
-class SalesInvoiceListView(generic.ListView, LoginRequiredMixin):
+class SalesInvoiceListView(LoginRequiredMixin, generic.ListView):
     model = SalesHeader
     paginate_by = 25
 
-class SalesInvoiceDetailView(generic.DetailView, LoginRequiredMixin):
+class SalesInvoiceDetailView(LoginRequiredMixin, generic.DetailView):
     model = SalesHeader
     paginate_by = 25
 
@@ -249,19 +250,23 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
         
         return super().get(request, *args, **kwargs)
 
-class ApprovalListView(generic.ListView, LoginRequiredMixin):
+class ApprovalListView(LoginRequiredMixin, generic.ListView):
     model = ApprovalEntry
     paginate_by = 10
 
-class ApprovalDetailView(generic.DetailView, LoginRequiredMixin):
+class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalEntry
     paginate_by =10
 
-class SalesCreditMemoListView(generic.ListView, LoginRequiredMixin):
+class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = ApprovalEntry
+    field = ['status']
+
+class SalesCreditMemoListView(LoginRequiredMixin, generic.ListView):
     model = SalesCreditMemoHeader
     paginate_by = 25
 
-class SalesCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
+class SalesCreditMemoDetailView(LoginRequiredMixin, generic.DetailView):
     model = SalesCreditMemoHeader
 
 class SalesCreditMemoHeaderInline():
@@ -310,11 +315,11 @@ class SalesCreditMemoCreate(LoginRequiredMixin, SalesCreditMemoHeaderInline, gen
                 'salesmemolines': SalesCreditMemoLineFormset(self.request.POST or None, prefix='lines'),
             }
 
-class PurchaseCreditMemoListView(generic.ListView, LoginRequiredMixin):
+class PurchaseCreditMemoListView(LoginRequiredMixin, generic.ListView):
     model = PurchaseCreditMemoHeader
     paginate_by = 25
 
-class PurchaseCreditMemoDetailView(generic.DetailView, LoginRequiredMixin):
+class PurchaseCreditMemoDetailView(LoginRequiredMixin, generic.DetailView):
     model = PurchaseCreditMemoHeader
 
 class PurchaseCreditMemoHeaderInline():
@@ -363,10 +368,10 @@ class PurchaseCreditMemoCreate(LoginRequiredMixin, PurchaseCreditMemoHeaderInlin
                 'purchasememolines': PurchaseCreditMemoLineFormset(self.request.POST or None, prefix='lines'),
             }
 
-class UnitCreateView(generic.edit.CreateView, LoginRequiredMixin):
+class UnitCreateView(LoginRequiredMixin, generic.edit.CreateView):
     model = Unit
     fields = ['code', 'description']
-    success_url = reverse_lazy("units")
+    success_url = reverse_lazy("inventory:units")
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         form.instance.created_by = self.request.user
         return super().form_valid(form)
@@ -375,10 +380,10 @@ class UnitListView(generic.ListView, LoginRequiredMixin):
     model = Unit
     paginate_by = 25
 
-class UnitDetailView(generic.DetailView, LoginRequiredMixin):
+class UnitDetailView(LoginRequiredMixin, generic.DetailView):
     model = Unit
 
-class UnitUpdateView(generic.edit.UpdateView, LoginRequiredMixin):
+class UnitUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Unit
     fields = ['description']
 
@@ -439,6 +444,10 @@ class UserProfile(View):
             user_profile.user.save()
 
         return redirect('inventory:home') 
+
+def create_approval_request(request):
+    ApprovalEntry.objects.create(requester=request.user, document_number='', details = '', amount=50, approver='')
+    return JsonResponse({'message':'Approval request sent'})
 
 
 

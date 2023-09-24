@@ -3,7 +3,9 @@
     Purchase Order Details
 {% endblock %}
 {% block content %}
+
     <h1>Purchase Order Card</h1>
+    <button id="approvalrequest">Send Approval Request</button> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
     <ul>
         <li><strong>Number:</strong>{{purchaseheader.number}}</li>
         <li><strong>Vendor:</strong>{{purchaseheader.vendor}}</li>
