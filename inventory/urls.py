@@ -38,5 +38,6 @@ urlpatterns = [
     path('approval/<str:pk>/', views.ApprovalUpdateView.as_view(), name="approval-update"),
     path('create-approval/', views.create_approval_request, name="create-approval"),
     path('profile/', views.UserProfile.as_view(), name='user-profile' ),
+    path('printout/', views.generate_pdf, name='printout'),
 ]
 

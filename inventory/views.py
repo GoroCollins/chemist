@@ -3,7 +3,7 @@ from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse
 from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile)
@@ -16,7 +16,8 @@ from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, Pur
                      PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-import reportlab
+from reportlab.pdfgen import canvas
+import io 
 
 
 @login_required
@@ -448,6 +449,16 @@ class UserProfile(View):
 def create_approval_request(request):
     ApprovalEntry.objects.create(requester=request.user, document_number='', details = '', amount=50, approver='')
     return JsonResponse({'message':'Approval request sent'})
+
+def generate_pdf(request, id):
+    buffer = io.BytesIO()
+    x = canvas.Canvas(buffer)
+    x.drawString(100, 100, "Test pdf")
+    x.showPage()
+    x.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename='attempt1.pdf')
+
 
 
 
