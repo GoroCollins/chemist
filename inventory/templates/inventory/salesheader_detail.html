@@ -12,6 +12,7 @@
   </ul>
 {% endif %}
     <a href="{% url 'inventory:invoices' %}">Back</a>
+    <a href="{% url 'inventory:printout' salesheader.number %}" target="_blank">Generate PDF</a>
     <h1>Sales Invoice Card</h1>
     <a href="{% url 'inventory:invoice-update' salesheader.number %}">Edit</a>
     <ul>

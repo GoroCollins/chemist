@@ -18,6 +18,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from reportlab.pdfgen import canvas
 import io 
+from django.templatetags.static import static
+from django.contrib.staticfiles import finders
 
 
 @login_required
@@ -450,14 +452,54 @@ def create_approval_request(request):
     ApprovalEntry.objects.create(requester=request.user, document_number='', details = '', amount=50, approver='')
     return JsonResponse({'message':'Approval request sent'})
 
-def generate_pdf(request, id):
+
+def generate_pdf(request, pk):
+    # Fetch the SalesHeader record
+    sales_header = get_object_or_404(SalesHeader, pk=pk)
+
+    # Fetch related sales lines
+    sales_lines = SalesLines.objects.filter(number=sales_header)
+
+    # Create the PDF object, using the response object as its "file."
     buffer = io.BytesIO()
-    x = canvas.Canvas(buffer)
-    x.drawString(100, 100, "Test pdf")
-    x.showPage()
-    x.save()
+    p = canvas.Canvas(buffer)
+
+    # image_path = static('inventory/images/mypic.png')
+    # print("Generated image path:", image_path)
+    image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'
+    p.drawImage(image_path, 400, 750, width=100, height=100) 
+
+# Ensure the image_path is not None
+    # if image_path:
+    #     print("Generated image path:", image_path)
+    #     p.drawImage(image_path, 400, 750, width=100, height=100)
+    # else:
+    #     print("Image not found!")
+
+    # Write sales header data to the PDF
+    y = 800  # Initial y coordinate for placing text
+    p.drawString(100, y, f"Invoice: {sales_header.number}")
+    p.drawString(100, y - 20, f"Customer: {sales_header.customer}")
+    y -= 40
+
+    # Write sales line data to the PDF
+    for line in sales_lines:
+        p.drawString(100, y, f"Product: {line.item}")
+        p.drawString(200, y, f"Quantity: {line.quantity}")
+        y -= 20
+
+    # Close the PDF object cleanly, and we're done.
+    p.showPage()
+    p.save()
+
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='attempt1.pdf')
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="invoice_{pk}.pdf"'
+    response.write(buffer.read())
+
+    return response
 
 
 
