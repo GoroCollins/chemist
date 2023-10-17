@@ -463,11 +463,12 @@ def generate_pdf(request, pk):
     # Create the PDF object, using the response object as its "file."
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer)
+    p.setFont("Helvetica", 14)
 
     # image_path = static('inventory/images/mypic.png')
     # print("Generated image path:", image_path)
     image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'
-    p.drawImage(image_path, 400, 750, width=100, height=100) 
+    p.drawImage(image_path, 500, 800, width=50, height=50) 
 
 # Ensure the image_path is not None
     # if image_path:
@@ -477,15 +478,16 @@ def generate_pdf(request, pk):
     #     print("Image not found!")
 
     # Write sales header data to the PDF
-    y = 800  # Initial y coordinate for placing text
-    p.drawString(100, y, f"Invoice: {sales_header.number}")
-    p.drawString(100, y - 20, f"Customer: {sales_header.customer}")
+    y = 700  # Initial y coordinate for placing text
+    p.drawString(50, y, f"Invoice: {sales_header.number}")
+    p.drawString(300, y, f"Customer: {sales_header.customer}")
+    p.drawString(500, y, f"Amount: {sales_header.amount}")
     y -= 40
 
     # Write sales line data to the PDF
     for line in sales_lines:
         p.drawString(100, y, f"Product: {line.item}")
-        p.drawString(200, y, f"Quantity: {line.quantity}")
+        p.drawString(300, y, f"Quantity: {line.quantity}")
         y -= 20
 
     # Close the PDF object cleanly, and we're done.
