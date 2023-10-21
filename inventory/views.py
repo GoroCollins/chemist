@@ -40,7 +40,9 @@ def index(request):
     pending_lpo = PurchaseHeader.objects.filter(status=1).count()
     open_lpo = PurchaseHeader.objects.filter(status=0).count()
     total_sales = SalesHeader.objects.aggregate(total=Sum('amount'))['total']
-    lpos_value = PurchaseHeader.objects.aggregate(total=Sum('total'))['total']
+    open_lpo_value = PurchaseHeader.objects.filter(status=0).aggregate(total=Sum('total'))['total']
+    released_lpos = PurchaseHeader.objects.filter(status=2).aggregate(total=Sum('total'))['total']
+    pending_lpo_value = PurchaseHeader.objects.filter(status=1).aggregate(total=Sum('total'))['total']
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
 
@@ -53,7 +55,9 @@ def index(request):
         'pending_lpo': pending_lpo,
         'open_lpo': open_lpo,
         'total_sales': total_sales,
-        'lpos_value': lpos_value
+        'open_lpo_value': open_lpo_value,
+        'released_lpos': released_lpos,
+        'pending_lpo_value': pending_lpo_value
     }
 
     # Render the HTML template index.html with the data in the context variable
