@@ -25,6 +25,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus.frames import Frame
+from django.db.models import Sum
 
 
 @login_required
@@ -38,6 +39,8 @@ def index(request):
     num_lpos = PurchaseHeader.objects.count()
     pending_lpo = PurchaseHeader.objects.filter(status=1).count()
     open_lpo = PurchaseHeader.objects.filter(status=0).count()
+    total_sales = SalesHeader.objects.aggregate(total=Sum('amount'))['total']
+    lpos_value = PurchaseHeader.objects.aggregate(total=Sum('total'))['total']
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
 
@@ -49,6 +52,8 @@ def index(request):
         'num_visits': num_visits,
         'pending_lpo': pending_lpo,
         'open_lpo': open_lpo,
+        'total_sales': total_sales,
+        'lpos_value': lpos_value
     }
 
     # Render the HTML template index.html with the data in the context variable
