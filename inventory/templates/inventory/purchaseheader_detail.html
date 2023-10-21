@@ -3,7 +3,9 @@
     Purchase Order Details
 {% endblock %}
 {% block content %}
-
+    {%if purchaseheader.status == '2' %}
+        <a href="{% url 'inventory:lpoprintout' purchaseheader.number %}" target="_blank">Generate PDF</a>
+    {% endif %}
     <h1>Purchase Order Card</h1>
     <button id="approvalrequest">Send Approval Request</button> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
     <ul>

@@ -20,6 +20,11 @@ from reportlab.pdfgen import canvas
 import io 
 from django.templatetags.static import static
 from django.contrib.staticfiles import finders
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer, PageTemplate
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus.frames import Frame
 
 
 @login_required
@@ -453,56 +458,109 @@ def create_approval_request(request):
     return JsonResponse({'message':'Approval request sent'})
 
 
-def generate_pdf(request, pk):
-    # Fetch the SalesHeader record
-    sales_header = get_object_or_404(SalesHeader, pk=pk)
+def sales_pdf(request, pk):
+    # Create a response object with the appropriate PDF headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="invoice_{pk}.pdf"'
 
+    # Create a PDF document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+
+    # Create a list of data for the table
+    data = [['Item', 'Batch Number', 'Quantity', 'Unit Price', 'Discount', 'Line Amount']]
+    sales_header = get_object_or_404(SalesHeader, pk=pk)
     # Fetch related sales lines
     sales_lines = SalesLines.objects.filter(number=sales_header)
+    for row in sales_lines:
+        data.append([row.item, row.batch, row.quantity, row.unit_price, row.discount, row.total])
+        # Create a list to hold the elements (text, image, and table)
+    elements = []
 
-    # Create the PDF object, using the response object as its "file."
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer)
-    p.setFont("Helvetica", 14)
+    # Load and add an image to the top-right frame
+    image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
+    img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
+    img.hAlign = 'RIGHT'  # Align the image to the right within the frame
 
-    # image_path = static('inventory/images/mypic.png')
-    # print("Generated image path:", image_path)
-    image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'
-    p.drawImage(image_path, 500, 800, width=50, height=50) 
+    elements.append(img)
 
-# Ensure the image_path is not None
-    # if image_path:
-    #     print("Generated image path:", image_path)
-    #     p.drawImage(image_path, 400, 750, width=100, height=100)
-    # else:
-    #     print("Image not found!")
+    # Add information from SalesHeader above the table
+    elements.append(Paragraph(f"Invoice Number: {sales_header.number}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Customer Name: {sales_header.customer}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Total Amount: Ksh. {sales_header.amount}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Invoice Date: {sales_header.date}", getSampleStyleSheet()["Title"]))
 
-    # Write sales header data to the PDF
-    y = 700  # Initial y coordinate for placing text
-    p.drawString(50, y, f"Invoice: {sales_header.number}")
-    p.drawString(300, y, f"Customer: {sales_header.customer}")
-    p.drawString(500, y, f"Amount: {sales_header.amount}")
-    y -= 40
+    # Add a spacer to create some space between the information and the table
+    elements.append(Spacer(1, 12))
 
-    # Write sales line data to the PDF
-    for line in sales_lines:
-        p.drawString(100, y, f"Product: {line.item}")
-        p.drawString(300, y, f"Quantity: {line.quantity}")
-        y -= 20
+    # Create a table and set its style
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
 
-    # Close the PDF object cleanly, and we're done.
-    p.showPage()
-    p.save()
-
-    # FileResponse sets the Content-Disposition header so that browsers
-    # present the option to save the file.
-    buffer.seek(0)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="invoice_{pk}.pdf"'
-    response.write(buffer.read())
-
+    # Build the PDF document
+    elements.append(table)
+    # doc.addPageTemplates(page_template)
+    doc.build(elements)
     return response
 
+def purchases_pdf(request, pk):
+    # Create a response object with the appropriate PDF headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="LPO_{pk}.pdf"'
+
+    # Create a PDF document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+
+    # Create a list of data for the table
+    data = [['Item', 'Batch Number', 'Quantity Requested', 'Unit Price', 'Line Amount']]
+    purchase_header = get_object_or_404(PurchaseHeader, pk=pk)
+    # Fetch related sales lines
+    purchase_lines = PurchaseLine.objects.filter(number=purchase_header)
+    for row in purchase_lines:
+        data.append([row.item, row.batch, row.quantity_requested, row.unit_price,  row.total])
+        # Create a list to hold the elements (text, image, and table)
+    elements = []
+
+    # Load and add an image to the top-right frame
+    image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
+    img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
+    img.hAlign = 'RIGHT'  # Align the image to the right within the frame
+
+    elements.append(img)
+
+    # Add information from SalesHeader above the table
+    elements.append(Paragraph(f"Purchase Order Number: {purchase_header.number}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Vendor Name: {purchase_header.vendor}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Purchase Order Amount: Ksh. {purchase_header.total}", getSampleStyleSheet()["Title"]))
+    elements.append(Paragraph(f"Purchase Order Date: {purchase_header.date}", getSampleStyleSheet()["Title"]))
+
+    # Add a spacer to create some space between the information and the table
+    elements.append(Spacer(1, 12))
+
+    # Create a table and set its style
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+
+    # Build the PDF document
+    elements.append(table)
+    # doc.addPageTemplates(page_template)
+    doc.build(elements)
+    return response
 
 
 
