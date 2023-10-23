@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django import forms
 from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
-                     PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset)
+                     PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset, PurchaseLineReceivingFormset, SalesLineUpdateFormset)
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from reportlab.pdfgen import canvas
@@ -137,7 +137,7 @@ class PurchaseHeaderInline():
         return redirect(url)
     
     def formset_purchaselines_valid(self, formset):
-        purchaselines = formset.save(commit=False)
+        purchaselines = formset.save(commit=False) # formsetname used for the id on templates
         for obj in formset.deleted_objects:
             obj.delete()
         for purchaseline in purchaselines:
@@ -165,10 +165,51 @@ class PurchaseOrderUpdate(LoginRequiredMixin, PurchaseHeaderInline, generic.edit
         context = super(PurchaseOrderUpdate, self).get_context_data(**kwargs)
         context['named_formsets'] = self.get_named_formsets()
         return context
+    
+    def get_named_formsets(self):
+            return {
+                'purchaselines': PurchaseLineFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+            }
+
+class PurchaseHeaderReceivingInline():
+    form_class = PurchaseHeaderForm
+    model = PurchaseHeader
+    template_name = "inventory/purchase_order_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
+        return redirect(url)
+    
+    def formset_purchaselines_valid(self, formset):
+        purchaselinesreceive = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for purchaseline in purchaselinesreceive:
+            purchaseline.number = self.object
+            purchaseline.save()
+
+class PurchaseOrderReceive(LoginRequiredMixin, PurchaseHeaderReceivingInline, generic.edit.UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super(PurchaseOrderReceive, self).get_context_data(**kwargs)
+        context['named_formsets'] = self.get_named_formsets()
+        return context
 
     def get_named_formsets(self):
         return {
-            'purchaselines': PurchaseLineFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+            'purchaselinesreceive': PurchaseLineReceivingFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
         }
 class SalesInvoiceListView(LoginRequiredMixin, generic.ListView):
     model = SalesHeader
@@ -224,7 +265,37 @@ class SalesInvoiceCreate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Cre
                 'saleslines': SalesLinesFormset(self.request.POST or None, prefix='lines'),
             }
 
-class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.UpdateView):
+class SalesHeaderUpdateInline():
+    form_class = SalesHeaderForm
+    model = SalesHeader
+    template_name = "inventory/sales_invoice_update.html"
+
+    def form_valid(self, form):
+        named_formsets = self.get_named_formsets()
+        if not all((x.is_valid() for x in named_formsets.values())):
+            return self.render_to_response(self.get_context_data(form=form))
+        self.object = form.save()
+
+        # for every formset, attempt to find a specific formset save function
+        # otherwise, just save.
+        for name, formset in named_formsets.items():
+            formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
+            if formset_save_func is not None:
+                formset_save_func(formset)
+            else:
+                formset.save()
+        url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': str(self.object.pk)})
+        return redirect(url)
+    
+    def formset_saleslines_valid(self, formset):
+        saleslinesupdate = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for saleline in saleslinesupdate:
+            saleline.number = self.object
+            saleline.save()
+
+class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderUpdateInline, generic.edit.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
         context['named_formsets'] = self.get_named_formsets()
@@ -232,7 +303,7 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
         return context
     def get_named_formsets(self):
         return {
-            'saleslines': SalesLinesFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
+            'saleslinesupdate': SalesLineUpdateFormset(self.request.POST or None,  instance=self.object, prefix='lines'),
         }
 
 
@@ -253,17 +324,17 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderInline, generic.edit.Upd
             # Redirect the user to the invoice-detail page
             url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': invoice_number})
             return redirect(url)
-        formset = self.get_named_formsets()['saleslines']
+        formset = self.get_named_formsets()['saleslinesupdate']
 
-        for form in formset:
-            if form.instance.pk: # Check if the form represents an existing row
-                # print("Disabling fields for existing rows") 
-                # print(f"Field name: {[field_name for field_name in form.fields.keys()]}")
-                for field_name, field in form.fields.items():
-                    field.widget.attrs['disabled'] = True
-                    #field.disabled = True
-                    print(f'Form.fields:{form.fields[field_name].widget.attrs}')
-                    print(f"Disabled field: {field_name}, Widget: {field.widget}")
+        # for form in formset:
+        #     if form.instance.pk: # Check if the form represents an existing row
+        #         # print("Disabling fields for existing rows") 
+        #         # print(f"Field name: {[field_name for field_name in form.fields.keys()]}")
+        #         for field_name, field in form.fields.items():
+        #             field.widget.attrs['disabled'] = True
+        #             #field.disabled = True
+        #             print(f'Form.fields:{form.fields[field_name].widget.attrs}')
+        #             print(f"Disabled field: {field_name}, Widget: {field.widget}")
         
         return super().get(request, *args, **kwargs)
 

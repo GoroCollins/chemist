@@ -1,31 +1,16 @@
 2. Create consolidated item entries capturing purchases, sales, and returns through a view.
-3. Add sales invoice finalize option on the front end.
 Implementation of views:
-     Have a list of items as links to item details which can allow editing(View and template)
-         - give edit option to only update quantity with reasons.(View and form)
-     Have a list of purchase orders as links to details (receiving)(view and template)
-       - allow editing of open LPOs.
-       - viewing and printing for approved LPOs.
-       - receiving approved LPOs.
-       - Implement approvals for LPO.
+Give edit option to only update quantity with reasons.(View and form) - allow admin to add a record to item entry table
+Allow editing of open LPOs - update form pending.
+Receiving approved LPOs - form is pending.
+Implement approvals for LPO.
        - Once approved cannot be editted and one can cancel approval and edit while open.
          - added status field with three options {0:'Open', 1:'Pending Approval', 2: 'Approved', 3:'Cancelled'}
          - when pending approval allow cancellation of users request then set to open(status)
          - when pending approval admin can approve and set to approved(status) or reject set to open(status) and display comments and force admin to comment
-     Have a list of sales invoices as links to details( View and template)
-       - on this view give option to create sales invoice.(View and form)
-       - allow editing for open invoices and only viewing and printing for finalized invoices.
-       - allow admin to open invoice.
-4. Approval Implementation
-  - model created to store entries
-  - handle logic in view: view for creating approval entry and one for approving the entries
-  - explore notifications ny email
-  - once approved update LPO header status using POST method through view and form
-5. Design the base html that will be extended - Done
-6. All lists to be tables without borders and primary link to be a link to the details
-7. Details to have sections with clickable section heads to reveal contents - Done
+Allow admin to open invoice with reasons. Check how updating open invoice is working.
+Details to have sections with clickable section heads to reveal contents
 Testing
-1. Introduced a bug in lpo receiving: invoice number and batch are not being validated
 2. In sales invoice line: ensure to list only entries for the selected item
 3. In sales memo automatically pick customer from invoice selected and fill item, batch, unit price from selected sales line and 
    removed item_entry field from sales memo table

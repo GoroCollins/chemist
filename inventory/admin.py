@@ -46,7 +46,7 @@ class ItemEntryAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Item Details', {"fields": ["item", "batch", "quantity",]}),
         ('Item Pricing', {"fields":[("cost","sale",)]}),
-        ('Document Source',{"fields":["source_code",]})
+        ('Document Source',{"fields":["source_code","purchase_doc_no"]})
         
     ]
     def has_delete_permission(self, request, obj = None):

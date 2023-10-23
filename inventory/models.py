@@ -233,7 +233,7 @@ class PurchaseHeader(models.Model):
     number = AlphanumericAutoField(primary_key=True, editable=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='vendor', related_query_name='vendor')
     date = models.DateField(auto_now_add=True, editable=False)
-    total = models.IntegerField(editable=False, default=0)
+    total = models.DecimalField(editable=False, default=0, max_digits=10, decimal_places=2)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled Approval'))
     status = models.CharField(max_length=30, choices=approval_status, default=0)
@@ -264,11 +264,11 @@ class PurchaseLine(models.Model):
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo')
     batch = models.CharField('Item Batch Number',max_length=200, null=True)
     quantity_requested = models.PositiveIntegerField(help_text='Quantity')
-    unit_price = models.FloatField('Unit Price')
-    total = models.IntegerField(editable=False)
+    unit_price = models.DecimalField('Unit Price', decimal_places=2, max_digits=10)
+    total = models.DecimalField(editable=False, max_digits=10, decimal_places=2)
     expiry_date = models.DateField('Expiry date', null=True)
     quantity_received = models.PositiveIntegerField(default=0)
-    markup = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=40, help_text="Percentage Markup")
+    markup = models.DecimalField(validators=[MaxValueValidator(100)], default=40, help_text="Percentage Markup", decimal_places=2, max_digits=6)
     invoice_no = models.CharField('Vendor Invoice Number',max_length=100, null=True)
 
     def save(self, *args, **kwargs):
@@ -282,27 +282,7 @@ class PurchaseLine(models.Model):
                 raise ValidationError('Enter batch number')
             if not self.expiry_date:
                 raise ValidationError('Enter expiry date')
-
-            # Update values of corresponding fields in ItemEntry
-            item_entry = self.item_entry.first()
-            item_entry.batch = self.batch
-            item_entry.quantity = self.quantity_received
-            item_entry.expiry_date = self.expiry_date
-            item_entry.cost = self.unit_price
-            item_entry.sale = self.unit_price * (1 + (self.markup/100))
-            item_entry.save()
-
-        else:
-            if self.unit_price < 0:
-                raise ValidationError('Unit Price must be positive')
-            else:
-                self.total = self.quantity_requested * self.unit_price
-            # Update the total value of the PurchaseLine
-            #self.total = self.quantity_requested * self.unit_price
-            # Create a new instance of PurchaseLine
-            super(PurchaseLine, self).save(*args, **kwargs)
-
-            # Create a new instance of ItemEntry
+            
             item_entry = ItemEntry.objects.create(
                 purchase_doc_no=self,
                 item=self.item,
@@ -312,12 +292,19 @@ class PurchaseLine(models.Model):
                 cost=self.unit_price,
                 sale=self.unit_price * (1 + (self.markup/100))
             )
+
+        else:
+            if self.unit_price < 0:
+                raise ValidationError('Unit Price must be positive')
+            else:
+                self.total = self.quantity_requested * self.unit_price
+            self.quantity_requested -= self.quantity_received
+            super(PurchaseLine, self).save(*args, **kwargs)
         try:
+            self.quantity_requested -= self.quantity_received
             super(PurchaseLine,self).save(*args, **kwargs)
         except ValidationError as e:
             raise e
-
-        #super(PurchaseLine, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'{self.number}'
@@ -399,8 +386,8 @@ class ItemEntry(models.Model):
     batch = models.CharField('Batch Number', max_length=200, null=True)
     quantity = models.IntegerField()
     expiry_date = models.DateField('Expiry Date', default=datetime.date.today)
-    cost = models.FloatField()
-    sale = models.FloatField()
+    cost = models.DecimalField(decimal_places=2, max_digits=10)
+    sale = models.DecimalField(decimal_places=2, max_digits=10)
     expiry_status = models.BooleanField(default=False)
     source_code = models.CharField(max_length=100)
 
@@ -457,9 +444,9 @@ class SalesLines(models.Model):
     batch = models.CharField(max_length=100, null=True)
     quantity = models.PositiveIntegerField()
     lpo = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',  null=True)
-    unit_price = models.FloatField(editable=False)
-    total = models.FloatField(editable=False)
-    discount = models.PositiveSmallIntegerField(validators=[MaxValueValidator(100)], default=0, help_text="Allowed Precentage Discount")
+    unit_price = models.DecimalField(editable=False, decimal_places=2, max_digits=10)
+    total = models.DecimalField(editable=False, decimal_places=2, max_digits=10)
+    discount = models.DecimalField(validators=[MaxValueValidator(100)], default=0, help_text="Allowed Precentage Discount", max_digits=6, decimal_places=2)
 
     def save(self, *args, **kwargs):
         if not self.unit_price:

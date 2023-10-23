@@ -1,0 +1,114 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<form enctype="multipart/form-data" class="container" method="post" id="product_form">
+    {% csrf_token %}
+    <!-- main form start --- in our case product form -->
+    <div class="card">
+        <div class="card-header card-header-secondary">
+            <h4 class="card-title">Purchase Header</h4>
+        </div>
+        {% for field in form %}
+            <div class="form-group card-body">
+                <label>{{field.label}}</label>
+                {% if field.field.required %}
+                    <span style="color: red;" class="required">*</span>
+                {% endif %}
+            
+                {{field}}
+                {% if field.help_text %}
+                    <small style="color: grey">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <!-- main form end --- in our case product form -->
+
+    <!-- inline form for Variant start -->
+
+    <!-- EXPLAINING with named_formsets.variants as formset -->
+    <!-- Note: named_formsets is used in get_context_data function in views.py -->
+    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
+    {% with named_formsets.purchaselines as formset %}
+        {{ formset.management_form }}
+        <script type="text/html" id="purchaselinesreceive-template">  // id="inlineformsetname-template"
+            // id='inlineformsetname-__prefix__' 
+            <tr id="purchaselinesreceive-__prefix__" class= hide_all>
+                {% for fields in formset.empty_form.hidden_fields %}
+                    {{ fields }}
+                {% endfor %}
+            
+                {% for fields in formset.empty_form.visible_fields %}
+                    <td>{{fields}}</td>
+                {% endfor %}
+            </tr>
+        </script>
+        <div class="table-responsive card mt-4">
+            <div class="card-header card-header-secondary">
+                <h4 class="card-title">Purchase Lines</h4>
+            </div>
+            <table class="table card-header">
+                <thead class="text-secondary">
+                    <th>Quantity Received <span style="color: red;" class="required">*</span></th>
+                    <th>Batch <span style="color: red;" class="required">*</span></th>
+                    <th>Expiry Date <span style="color: red;" class="required">*</span></th>
+                    <th>Markup <span style="color: red;" class="required">*</span></th>
+                    <th>Invoice Number <span style="color: red;" class="required">*</span></th>
+                </thead>
+                <tbody id="item-purchaselinesreceive">  <!-- id="item-inlineformsetname" -->
+                    <!-- formset non forms errors -->
+                    {% for error in formset.non_form_errors %}
+                        <span style="color: red">{{ error }}</span>
+                    {% endfor %}
+                    {% for formss in formset %}
+                        {{ formss.management_form }}
+                        <tr id="purchaselinesreceive-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                            {{ formss.id }}
+                            {% for field in formss.visible_fields %}
+                                <td>
+                                    {{field}}
+                                    {% for error in field.errors %}
+                                        <span style="color: red">{{ error }}</span>
+                                    {% endfor %}
+                                    
+                                    {% comment %} {{ field.DELETE }} {% endcomment %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
+            <!-- <button id="add-purchaselines-button" class="btn btn-secondary add-lines">Add More</button> -->
+        </div>
+        
+        {% endwith %}
+        <!-- inline form for Images end -->
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-secondary btn-block">Submit</button>
+        </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+<script>
+  $(document).ready(function() {
+    // when user clicks add more btn of variants
+      $('.add-lines').click(function(ev) {
+          ev.preventDefault();
+          var count = $('#item-purchaselinesreceive').children().length;
+          var tmplMarkup = $('#purchaselinesreceive-template').html();
+          var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+          $('#item-purchaselinesreceive').append(compiledTmpl);
+  
+          // update form count
+          $('#id_purchaselinesreceive-TOTAL_FORMS').attr('value', count+1);
+      });
+  });
+</script>
+        
+{% endblock content %}

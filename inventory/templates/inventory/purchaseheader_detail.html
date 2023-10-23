@@ -5,9 +5,10 @@
 {% block content %}
     {%if purchaseheader.status == '2' %}
         <a href="{% url 'inventory:lpoprintout' purchaseheader.number %}" target="_blank">Generate PDF</a>
+        <a href="{% url 'inventory:purchaseorder-receive' purchaseheader.number %}">Receive</a>
     {% endif %}
     <h1>Purchase Order Card</h1>
-    <button id="approvalrequest">Send Approval Request</button> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
+    {% if purchaseheader.status == '2'%} {% else %} <button id="approvalrequest">Send Approval Request</button> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a> {% endif %}
     <ul>
         <li><strong>Number:</strong>{{purchaseheader.number}}</li>
         <li><strong>Vendor:</strong>{{purchaseheader.vendor}}</li>

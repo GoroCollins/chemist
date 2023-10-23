@@ -3,14 +3,6 @@ from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from . models import (Item, ItemEntry, Unit, Vendor, PurchaseHeader, PurchaseLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, SalesHeader, 
                       SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine)
-# Usersignup
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
- 
-class SignUpForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ('username', 'password1', 'password2', )
 
 
 class SalesHeaderForm(forms.ModelForm):
@@ -26,6 +18,13 @@ class SalesLinesForm(forms.ModelForm):
 # Inline formset
 SalesLinesFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesForm, can_delete=True, can_delete_extra=True, extra=1)
 
+class SalesLinesUpdateForm(forms.ModelForm):
+    class Meta:
+        model = SalesLines 
+        fields = ['item', 'lpo', 'quantity', 'discount']
+
+SalesLineUpdateFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesUpdateForm, can_delete=False, extra=1)
+
 class PurchaseHeaderForm(forms.ModelForm):
     class Meta:
         model = PurchaseHeader
@@ -37,6 +36,13 @@ class PurchaseLineForm(forms.ModelForm):
         fields = ['item', 'quantity_requested', 'unit_price']
 
 PurchaseLineFormset = forms.inlineformset_factory(PurchaseHeader, PurchaseLine, form=PurchaseLineForm, can_delete=True, can_delete_extra=True, extra=1)
+
+class PurchaseLineReceivingForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseLine
+        fields = ['quantity_received', 'batch', 'expiry_date', 'markup', 'invoice_no']
+
+PurchaseLineReceivingFormset = forms.inlineformset_factory(PurchaseHeader, PurchaseLine, form=PurchaseLineReceivingForm, can_delete=False,extra=0)
 
 class SalesCreditMemoHeaderForm(forms.ModelForm):
     class Meta:

@@ -166,3 +166,56 @@ nav ul li a {
     color: #fff;
 }
 
+.pagination {
+    text-align: center;
+}
+
+.pagination a {
+    padding: 8px;
+    text-decoration: none;
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.pagination a:hover {
+    background-color: #ddd;
+}
+
+.pagination .current-page {
+    font-weight: bold;
+}
+
+.step-links {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.step-links a {
+    padding: 8px 12px;
+    text-decoration: none;
+    background-color: #337ab7;
+    color: #fff;
+    border: 1px solid #337ab7;
+    margin: 2px;
+    border-radius: 3px;
+}
+
+.step-links a:hover {
+    background-color: #235a92;
+    border: 1px solid #235a92;
+}
+
+.step-links .current-page {
+    font-weight: bold;
+    color: #333;
+}
+
+.current-page {
+    font-weight: bold;
+    color: #333; /* Text color for the current page indicator */
+    background-color: #f2f2f2; /* Background color for the current page indicator */
+    padding: 4px 8px; /* Padding for the indicator */
+    border: 1px solid #ccc; /* Border around the indicator */
+    border-radius: 3px; /* Rounded corners for the indicator */
+}
+
