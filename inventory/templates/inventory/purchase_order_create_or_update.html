@@ -3,7 +3,6 @@
 {% block content %}
 <form enctype="multipart/form-data" class="container" method="post" id="product_form">
     {% csrf_token %}
-    <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
             <h4 class="card-title">Purchase Header</h4>
@@ -25,13 +24,6 @@
             </div>
         {% endfor %}
     </div>
-    <!-- main form end --- in our case product form -->
-
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
     {% with named_formsets.purchaselines as formset %}
         {{ formset.management_form }}
         <script type="text/html" id="purchaselines-template">  // id="inlineformsetname-template"

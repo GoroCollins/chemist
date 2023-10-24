@@ -102,7 +102,13 @@
                <li><a href="{% url 'account_login' %}?next={{ request.path }}">Login</a></li>
              {% endif %}
             </ul> -->
-          {% block pagination %}
+          
+          {% endblock %}
+
+        </div>
+        <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
+      </div>
+      {% block pagination %}
           {% if is_paginated %}
               <div class="pagination">
                   <span class="step-links">
@@ -115,18 +121,12 @@
                       </span>
                       {% if page_obj.has_next %}
                           <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                          <a href="?page={{ salesheader_list.paginator.num_pages }}">last &raquo;</a>
+                          <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
                       {% endif %}
                   </span>
               </div>
           {% endif %}
         {% endblock %}
-          
-          {% endblock %}
-
-        </div>
-        <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
-      </div>
     </div>
     <script src="{% static 'inventory/script.js' %}"></script>
   </body>

@@ -25,14 +25,7 @@
             </div>
         {% endfor %}
     </div>
-    <!-- main form end --- in our case product form -->
-
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
-    {% with named_formsets.purchaselines as formset %}
+    {% with named_formsets.purchaselinesreceive as formset %}
         {{ formset.management_form }}
         <script type="text/html" id="purchaselinesreceive-template">  // id="inlineformsetname-template"
             // id='inlineformsetname-__prefix__' 

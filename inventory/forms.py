@@ -23,7 +23,7 @@ class SalesLinesUpdateForm(forms.ModelForm):
         model = SalesLines 
         fields = ['item', 'lpo', 'quantity', 'discount']
 
-SalesLineUpdateFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesUpdateForm, can_delete=False, extra=1)
+SalesLineUpdateFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesUpdateForm, can_delete=False, extra=0)
 
 class PurchaseHeaderForm(forms.ModelForm):
     class Meta:

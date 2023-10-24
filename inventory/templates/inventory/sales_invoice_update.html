@@ -3,7 +3,6 @@
 {% block content %}
 <form enctype="multipart/form-data" class="container" method="post" id="product_form">
     {% csrf_token %}
-    <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
             <h4 class="card-title">Sales Header</h4>
@@ -25,14 +24,7 @@
             </div>
         {% endfor %}
     </div>
-    <!-- main form end --- in our case product form -->
-
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
-    {% with named_formsets.saleslines as formset %}
+    {% with named_formsets.saleslinesupdate as formset %}
         {{ formset.management_form }}
         <script type="text/html" id="saleslinesupdate-template">  // id="inlineformsetname-template"
             // id='inlineformsetname-__prefix__' 
@@ -56,7 +48,6 @@
                     <th>Item entry <span style="color: red;" class="required">*</span></th>
                     <th>Quantity <span style="color: red;" class="required">*</span></th>
                     <th>Discount <span style="color: red;" class="required">*</span></th>
-                    <th>Delete?</th>
                 </thead>
                 <tbody id="item-saleslinesupdate">  <!-- id="item-inlineformsetname" -->
                     <!-- formset non forms errors -->
@@ -93,12 +84,16 @@
 </form>
 
 <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
 
 <script>
   $(document).ready(function() {
+    console.log("Document ready. Click handler registering.");
     // when user clicks add more btn of variants
       $('.add-lines').click(function(ev) {
+          console.log("Add More button clicked.");
           ev.preventDefault();
           var count = $('#item-saleslinesupdate').children().length;
           var tmplMarkup = $('#saleslinesupdate-template').html();
