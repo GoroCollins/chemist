@@ -171,7 +171,7 @@ class PurchaseOrderUpdate(LoginRequiredMixin, PurchaseHeaderInline, generic.edit
 class PurchaseHeaderReceivingInline():
     form_class = PurchaseHeaderForm
     model = PurchaseHeader
-    template_name = "inventory/purchase_order_update.html"
+    template_name = "inventory/purchase_order_receive.html"
 
     def form_valid(self, form):
         named_formsets = self.get_named_formsets()
@@ -200,6 +200,7 @@ class PurchaseOrderReceive(LoginRequiredMixin, PurchaseHeaderReceivingInline, ge
     def get_context_data(self, **kwargs):
         context = super(PurchaseOrderReceive, self).get_context_data(**kwargs)
         context['named_formsets'] = self.get_named_formsets()
+        context['is_update'] = True
         return context
 
     def get_named_formsets(self):
@@ -295,6 +296,7 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderUpdateInline, generic.ed
         context = super(SalesInvoiceUpdate, self).get_context_data(**kwargs)
         context['named_formsets'] = self.get_named_formsets()
         context['messages'] = messages.get_messages(self.request)
+        context['is_update'] = True
         return context
     def get_named_formsets(self):
         return {

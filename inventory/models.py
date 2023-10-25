@@ -275,7 +275,7 @@ class PurchaseLine(models.Model):
         if self.pk:
             # Update existing instance
             if self.quantity_received > self.quantity_requested:
-                raise ValidationError('You cannot receive more than requested')
+                raise ValidationError(f'You cannot receive more {self.quantity_requested} that were requested')
             if not self.invoice_no:
                 raise ValidationError('Enter vendor invoice number')
             if not self.batch:

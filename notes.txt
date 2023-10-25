@@ -25,3 +25,9 @@ if (request.method == "POST):
 'btn-1'))
        new_value_button.save()
 ----------------------------------------------------------------------
+   Updating the receive order template 
+                   <!-- {% else %}
+                    {{field}}
+                {% endif %} -->
+               {{ field.value.vendor.vendor}}
+-----------------------------------------------------------------

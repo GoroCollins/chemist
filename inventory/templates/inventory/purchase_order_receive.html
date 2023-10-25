@@ -11,11 +11,15 @@
         {% for field in form %}
             <div class="form-group card-body">
                 <label>{{field.label}}</label>
-                {% if field.field.required %}
+                <!-- {% if field.field.required %}
                     <span style="color: red;" class="required">*</span>
+                {% endif %} -->
+                
+                {% if is_update %}
+                    <input type="text" name="{{ field.name }}" value="{{ field.value }}" readonly>
+                    
                 {% endif %}
-            
-                {{field}}
+
                 {% if field.help_text %}
                     <small style="color: grey">{{ field.help_text }}</small>
                 {% endif %}
