@@ -3,7 +3,6 @@
 {% block content %}
 <form enctype="multipart/form-data" class="container" method="post" id="product_form">
     {% csrf_token %}
-    <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
             <h4 class="card-title">Sales Header</h4>
@@ -25,7 +24,6 @@
             </div>
         {% endfor %}
     </div>
-    <!-- main form end --- in our case product form -->
 
     <!-- inline form for Variant start -->
 
@@ -82,24 +80,23 @@
                 </tbody>
             </table>
             <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
-            <button id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</button>
+            <button id="add-saleslines-button" class="btn btn-secondary add-slines">Add More</button>
         </div>
         
         {% endwith %}
-        <!-- inline form for Images end -->
 
         <div class="form-group">
             <button type="submit" class="btn btn-secondary btn-block">Submit</button>
         </div>
 </form>
 
-<!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 
 <script>
   $(document).ready(function() {
     // when user clicks add more btn of variants
-      $('.add-lines').click(function(ev) {
+      $('.add-slines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-saleslines').children().length;
           var tmplMarkup = $('#saleslines-template').html();

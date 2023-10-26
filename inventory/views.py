@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.http import HttpResponse, Http404, JsonResponse, FileResponse
 from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
-                     SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile)
+                     SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile, ApprovalSetup)
 from django.views import generic, View
 from django.template import loader
 from django.urls import reverse_lazy
@@ -134,7 +134,7 @@ class PurchaseHeaderInline():
         return redirect(url)
     
     def formset_purchaselines_valid(self, formset):
-        purchaselines = formset.save(commit=False) # formsetname used for the id on templates
+        purchaselines = formset.save(commit=False) 
         for obj in formset.deleted_objects:
             obj.delete()
         for purchaseline in purchaselines:
@@ -225,9 +225,6 @@ class SalesHeaderInline():
         if not all((x.is_valid() for x in named_formsets.values())):
             return self.render_to_response(self.get_context_data(form=form))
         self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
@@ -322,16 +319,6 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderUpdateInline, generic.ed
             url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': invoice_number})
             return redirect(url)
         formset = self.get_named_formsets()['saleslinesupdate']
-
-        # for form in formset:
-        #     if form.instance.pk: # Check if the form represents an existing row
-        #         # print("Disabling fields for existing rows") 
-        #         # print(f"Field name: {[field_name for field_name in form.fields.keys()]}")
-        #         for field_name, field in form.fields.items():
-        #             field.widget.attrs['disabled'] = True
-        #             #field.disabled = True
-        #             print(f'Form.fields:{form.fields[field_name].widget.attrs}')
-        #             print(f"Disabled field: {field_name}, Widget: {field.widget}")
         
         return super().get(request, *args, **kwargs)
 
@@ -638,6 +625,9 @@ def purchases_pdf(request, pk):
     # doc.addPageTemplates(page_template)
     doc.build(elements)
     return response
+
+def approval_request_creation(request, user):
+    approver = ApprovalSetup.objects.get(user=user)
 
 
 

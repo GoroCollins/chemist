@@ -15,7 +15,6 @@ class SalesLinesForm(forms.ModelForm):
         model = SalesLines
         fields = ['item', 'lpo', 'quantity', 'discount']
 
-# Inline formset
 SalesLinesFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesForm, can_delete=True, can_delete_extra=True, extra=1)
 
 class SalesLinesUpdateForm(forms.ModelForm):
