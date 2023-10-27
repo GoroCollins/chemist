@@ -39,6 +39,10 @@ urlpatterns = [
     path('approval/<str:pk>/', views.ApprovalUpdateView.as_view(), name="approval-update"),
     path('create-approval/', views.create_approval_request, name="create-approval"),
     path('profile/', views.UserProfile.as_view(), name='user-profile' ),
+    path("approvalsetup/", views.ApprovalSetupListView.as_view(), name="approvalsetup"),
+    path("approvalsetup-create/", views.ApprovalSetupCreateView.as_view(), name="approvalsetup-create"),
+    path("approvalsetup-update/<str:pk>/", views.ApprovalSetupUpdateView.as_view(), name="approvalsetup-edit"),
+    path("approvalsetup-detail/<str:pk>/", views.ApprovalSetupDetailView.as_view(), name="approvalsetup-detail"),
     path('invoice-printout/<str:pk>/', views.sales_pdf, name='invoiceprintout'),
     path('lpo-printout/<str:pk>/', views.purchases_pdf, name='lpoprintout'),
 ]

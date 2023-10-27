@@ -3,7 +3,7 @@ from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse, StreamingHttpResponse
 from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile, ApprovalSetup)
@@ -26,6 +26,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus.frames import Frame
 from django.db.models import Sum
+import csv
 
 
 @login_required
@@ -516,7 +517,23 @@ class UserProfile(View):
             user_profile.user.save()
 
         return redirect('inventory:home') 
+class ApprovalSetupListView(LoginRequiredMixin, generic.ListView):
+    model = ApprovalSetup
+    paginate_by = 25
 
+class ApprovalSetupCreateView(LoginRequiredMixin, generic.CreateView):
+    model = ApprovalSetup
+    fields = ['user', 'approver']
+    success_url = reverse_lazy("inventory:approvalsetup")
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+class ApprovalSetupUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = ApprovalSetup
+    fields = ['approver']
+class ApprovalSetupDetailView(LoginRequiredMixin, generic.DetailView):
+    model = ApprovalSetup
 def create_approval_request(request):
     ApprovalEntry.objects.create(requester=request.user, document_number='', details = '', amount=50, approver='')
     return JsonResponse({'message':'Approval request sent'})
@@ -626,8 +643,14 @@ def purchases_pdf(request, pk):
     doc.build(elements)
     return response
 
-def approval_request_creation(request, user):
-    approver = ApprovalSetup.objects.get(user=user)
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
 
 
 

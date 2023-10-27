@@ -568,28 +568,23 @@ class ApprovalEntry(models.Model):
 class ApprovalSetup(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='user', related_query_name='user')
     approver = models.ForeignKey(User, on_delete=models.PROTECT, related_name='approver_id', related_query_name='approver_id')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='creator_id', related_query_name='creator_id', editable=False)
     modified_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='modifier_id', related_query_name='modifier_id', editable=False)
 
     class Meta:
         verbose_name_plural = 'Approvals Setup'
     def __str__(self) -> str:
         return f"User:{self.user}   Approver:{self.approver}"
+    def get_absolute_url(self):
+        return reverse('inventory:approvalsetup-detail', args=[str(self.id)])
     def save(self, *args, **kwargs):
         user = get_current_user()
         if user and not user.pk:
             user = None
         if not self.pk:
             self.modified_by = user
-        #self.modified_by = user
+        # self.created_by = user
         super(ApprovalSetup, self).save(*args, **kwargs)
-# @receiver(post_save, sender=User)
-# def create_user_approval(sender, instance, created, **kwargs):
-#     if created:
-#         ApprovalSetup.objects.create(user=instance)
-
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.profile.save()
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

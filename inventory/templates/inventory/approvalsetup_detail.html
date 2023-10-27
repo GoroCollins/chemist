@@ -1,0 +1,12 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Approval Setup
+{% endblock %}
+{% block content %}
+    <h1>Approval Setup Card</h1>
+    <a href="{% url 'inventory:approvalsetup-edit' approvalsetup.pk %}">Edit</a>
+    <ul>
+        <li><strong>User:</strong>{{ approvalsetup.user }}</li>
+        <li><strong>Approver:</strong>{{ approvalsetup.approver }}</li>
+    </ul>
+{% endblock %}

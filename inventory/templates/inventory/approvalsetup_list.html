@@ -1,0 +1,25 @@
+{% extends "inventory/base.html" %}
+{% block title %}
+    Approval Setup
+{% endblock %}
+{% block content %}
+    <a href="{% url 'inventory:approvalsetup-create' %}">Create Approval Setup</a>
+    <h1>Approval Setup</h1>
+    <table>
+        <tr>
+            <th>User</th>
+            <th>Approver</th>
+            <th>Created by</th>
+            <th>Modified by</th>
+        </tr>
+        {% for approvalsetup in approvalsetup_list %}
+        <tr>
+            <td><a href="{% url 'inventory:approvalsetup-detail' approvalsetup.pk %}">{{ approvalsetup.user }}</a></td>
+            <td>{{ approvalsetup.approver }}</td>
+            <td>{{ approvalsetup.created_by }}</td>
+            <td>{{ approvalsetup.modified_by }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+        
+{% endblock %}
