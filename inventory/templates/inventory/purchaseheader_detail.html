@@ -3,12 +3,17 @@
     Purchase Order Details
 {% endblock %}
 {% block content %}
-    {%if purchaseheader.status == '2' %}
+<a href="{% url 'inventory:purchaseorders' %}">Purchase Orders List</a>
+    <h1>Purchase Order Card</h1>
+    {% if purchaseheader.status == '2' %}
         <a href="{% url 'inventory:lpoprintout' purchaseheader.number %}" target="_blank">Generate PDF</a>
         <a href="{% url 'inventory:purchaseorder-receive' purchaseheader.number %}">Receive</a>
+    {% else %}
+    <form method="post">
+        {% csrf_token %} <!-- Place it here, outside the if condition -->
+        <button id="create-approval-request">Send Approval Request</button>
+    </form> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
     {% endif %}
-    <h1>Purchase Order Card</h1>
-    {% if purchaseheader.status == '2'%} {% else %} <button id="approvalrequest">Send Approval Request</button> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a> {% endif %}
     <ul>
         <li><strong>Number:</strong>{{purchaseheader.number}}</li>
         <li><strong>Vendor:</strong>{{purchaseheader.vendor}}</li>
@@ -48,4 +53,29 @@
         </tr>
         {% endfor %}
     </table>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function() {
+        $("#create-approval-request").click(function() {
+            var documentNumber = "{{ purchaseheader.number }}";
+            var amount = "{{ purchaseheader.total }}";
+            
+            $.ajax({
+                url: "{% url 'inventory:purchaseorder-detail' purchaseheader.number %}",
+                method: "POST",
+                data: {
+                    document_number: documentNumber,
+                    amount: amount
+                },
+                success: function(data) {
+                    alert(data.message);
+                },
+                error: function(xhr, status, error) {
+                    alert("Error: " + error);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

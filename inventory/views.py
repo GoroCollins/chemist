@@ -109,11 +109,41 @@ class PurchaseHeaderListView(LoginRequiredMixin, generic.ListView):
 
 class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
     model = PurchaseHeader
-    template_name = 'inventory/purchaseheader_detail.html'  # Ensure correct template name
+    template_name = 'inventory/purchaseheader_detail.html'
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get('pk')
         return get_object_or_404(PurchaseHeader, number=pk)
+
+    def post(self, request, pk):
+        if request.method == 'POST':
+            purchase_header = self.get_object()
+            
+            # Retrieve the total value from the PurchaseHeader model and convert it to Decimal
+            amount = purchase_header.total
+
+            if pk and amount:
+                # Find the appropriate approver
+                try:
+                    approver_setup = ApprovalSetup.objects.get(user=request.user)
+                    approver = approver_setup.approver
+                except ApprovalSetup.DoesNotExist:
+                    approver = None
+
+                # Create an ApprovalEntry with the determined approver
+                ApprovalEntry.objects.create(
+                    requester=request.user,
+                    document_number=purchase_header,  # Assign the document number (primary key)
+                    details="Your details here",
+                    amount=purchase_header.total,  # Convert the amount to Decimal
+                    approver=approver
+                )
+                return JsonResponse({'message': 'Approval request sent'})
+            else:
+                return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
+        else:
+            return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 class PurchaseHeaderInline():
     form_class = PurchaseHeaderForm
@@ -534,9 +564,33 @@ class ApprovalSetupUpdateView(LoginRequiredMixin, generic.UpdateView):
     fields = ['approver']
 class ApprovalSetupDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalSetup
-def create_approval_request(request):
-    ApprovalEntry.objects.create(requester=request.user, document_number='', details = '', amount=50, approver='')
-    return JsonResponse({'message':'Approval request sent'})
+
+# def create_approval_request(request):
+#     if request.method == 'POST':
+#         document_number = request.POST.get('document_number')
+#         amount = request.POST.get('amount')
+
+#         if document_number and amount:
+#             # Find the appropriate approver
+#             try:
+#                 approver_setup = ApprovalSetup.objects.get(user=request.user)
+#                 approver = approver_setup.approver
+#             except ApprovalSetup.DoesNotExist:
+#                 approver = None
+
+#             # Create an ApprovalEntry with the determined approver
+#             ApprovalEntry.objects.create(
+#                 requester=request.user,
+#                 document_number=document_number,
+#                 details="Your details here",
+#                 amount=amount,
+#                 approver=approver  # Set to the appropriate approver or None
+#             )
+#             return JsonResponse({'message': 'Approval request sent'})
+#         else:
+#             return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
+#     else:
+#         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 def sales_pdf(request, pk):
