@@ -60,13 +60,15 @@
         $("#create-approval-request").click(function() {
             var documentNumber = "{{ purchaseheader.number }}";
             var amount = "{{ purchaseheader.total }}";
+            var csrfToken = "{% csrf_token %}";
             
             $.ajax({
                 url: "{% url 'inventory:purchaseorder-detail' purchaseheader.number %}",
                 method: "POST",
                 data: {
                     document_number: documentNumber,
-                    amount: amount
+                    amount: amount,
+                    csrfmiddlewaretoken: csrfToken
                 },
                 success: function(data) {
                     alert(data.message);

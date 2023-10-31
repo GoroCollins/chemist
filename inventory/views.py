@@ -135,8 +135,9 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
                     requester=request.user,
                     document_number=purchase_header,  # Assign the document number (primary key)
                     details="Your details here",
-                    amount=purchase_header.total,  # Convert the amount to Decimal
-                    approver=approver
+                    amount=amount,  # Convert the amount to Decimal
+                    approver=approver,
+                    request_date=timezone.now()
                 )
                 return JsonResponse({'message': 'Approval request sent'})
             else:

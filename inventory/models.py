@@ -540,11 +540,12 @@ class ApprovalEntry(models.Model):
     details = models.CharField(max_length=200)
     approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled Approval'))
     status = models.CharField(max_length=20, choices=approval_status, default=1)
-    approver = models.ForeignKey('auth.User', on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
-    amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')
+    approver = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
+    #amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')
+    amount = models.DecimalField(decimal_places=2, max_digits=10)
     request_date = models.DateTimeField(auto_now_add=True)
     last_modified_at = models.DateTimeField(auto_now=True)
-    modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='modifier', related_query_name='modifier',editable=False)
+    modified_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='modifier', related_query_name='modifier',editable=False)
     due_date = models.DateField(default=timezone.now)
     overdue = models.BooleanField(default=False)
     reason = models.CharField(max_length=200, null=True)
@@ -553,10 +554,11 @@ class ApprovalEntry(models.Model):
         return f'{self.requester}-{self.document_number}: {self.details}'
     @property
     def is_overdue(self):
-        return datetime.today - self.request_date < 5
+        # return datetime.today - self.request_date < 5
+        return timezone.now() - self.request_date < timezone.timedelta(days=5)
     def save(self, *args, **kwargs):
         self.overdue = self.is_overdue
-        self.details = "Amount: " + self.amount + "LPO Number: " + self.document_number
+        self.details = "Amount: " + str(self.amount) + "LPO Number: " + str(self.document_number)
         super(ApprovalEntry, self).save(*args, **kwargs)
     def get_absolute_url(self):
         return reverse('inventory:approval-detail', args=[str(self.id)])
