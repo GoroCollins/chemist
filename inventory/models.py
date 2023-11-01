@@ -235,7 +235,7 @@ class PurchaseHeader(models.Model):
     date = models.DateField(auto_now_add=True, editable=False)
     total = models.DecimalField(editable=False, default=0, max_digits=10, decimal_places=2)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled Approval'))
+    approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled'))
     status = models.CharField(max_length=30, choices=approval_status, default=0)
     created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
     modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
@@ -456,7 +456,7 @@ class SalesLines(models.Model):
                 self.batch = item_entry.batch
                 item_entry.quantity -= self.quantity
                 if item_entry.quantity < 0:
-                    raise ValidationError(f'{self.item} is out of stock')
+                    raise ValidationError(f'{self.item} is out of stock for batch {self.batch}')
                 else:
                     item_entry.save()
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
@@ -538,7 +538,7 @@ class ApprovalEntry(models.Model):
     requester = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT, related_name='requestor', related_query_name='requestor')
     document_number = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval', related_query_name='approval')
     details = models.CharField(max_length=200)
-    approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled Approval'))
+    approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled'))
     status = models.CharField(max_length=20, choices=approval_status, default=1)
     approver = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
     #amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')
@@ -555,7 +555,7 @@ class ApprovalEntry(models.Model):
     @property
     def is_overdue(self):
         # return datetime.today - self.request_date < 5
-        return timezone.now() - self.request_date < timezone.timedelta(days=5)
+        return timezone.now() - self.request_date >= timezone.timedelta(days=5)
     def save(self, *args, **kwargs):
         self.overdue = self.is_overdue
         self.details = "Amount: " + str(self.amount) + "LPO Number: " + str(self.document_number)
@@ -566,6 +566,12 @@ class ApprovalEntry(models.Model):
     class Meta:
         ordering = ["id"]
         verbose_name_plural = "Approval Entries"
+@receiver(post_save, sender=ApprovalEntry)
+def update_purchase_order_approval_status(sender, instance, created, **kwargs):
+    if created:
+            lpo_approval = instance.document_number
+            lpo_approval.status = instance.status
+            lpo_approval.save()
 
 class ApprovalSetup(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='user', related_query_name='user')
@@ -611,8 +617,6 @@ class Profile(models.Model):
             new_img = (100, 100)
             img.thumbnail(new_img)
             img.save(self.profile_image.path)
-
-
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

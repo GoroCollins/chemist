@@ -1,14 +1,12 @@
 {% extends "inventory/base.html" %}
 {% block title %}
- <p>Approval Details</p>
+ Approval Details
 {% endblock %}
 {% block content %}
 
 <h2>Approval Entry Card</h2>
-{% if approvalentry.status %}
-    <p>{{ approvalentry.status }}</p>
-{% else %}
-<button value="2" name="approve">Approve</button>|<button value="3" name="reject">Reject</button>
+<!-- <button value="2" name="approve">Approve</button>|<button value="3" name="reject">Reject</button> -->
+{% if approvalentry.status == '1'%}
 <a href="{% url 'inventory:approval-update' approvalentry.id %}">Approve|Reject</a>
 {% endif %}
 <ul>

@@ -364,7 +364,7 @@ class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
 
 class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = ApprovalEntry
-    field = ['status']
+    fields = ['status']
 
 class SalesCreditMemoListView(LoginRequiredMixin, generic.ListView):
     model = SalesCreditMemoHeader

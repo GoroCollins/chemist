@@ -3,16 +3,20 @@
     Purchase Order Details
 {% endblock %}
 {% block content %}
+<div id="message" style="display: none;"></div>
 <a href="{% url 'inventory:purchaseorders' %}">Purchase Orders List</a>
     <h1>Purchase Order Card</h1>
     {% if purchaseheader.status == '2' %}
         <a href="{% url 'inventory:lpoprintout' purchaseheader.number %}" target="_blank">Generate PDF</a>
         <a href="{% url 'inventory:purchaseorder-receive' purchaseheader.number %}">Receive</a>
-    {% else %}
+    {% elif purchaseheader.status == '0' %}
     <form method="post">
         {% csrf_token %} <!-- Place it here, outside the if condition -->
         <button id="create-approval-request">Send Approval Request</button>
     </form> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
+    {% elif purchaseheader.status == '1' %}
+        <button>Cancel Approval Request</button>
+    {% elif purchaseheader.status == '3' %}
     {% endif %}
     <ul>
         <li><strong>Number:</strong>{{purchaseheader.number}}</li>
@@ -71,7 +75,8 @@
                     csrfmiddlewaretoken: csrfToken
                 },
                 success: function(data) {
-                    alert(data.message);
+                    $("#message").text(data.message).show();
+                    // alert(data.message);
                 },
                 error: function(xhr, status, error) {
                     alert("Error: " + error);
