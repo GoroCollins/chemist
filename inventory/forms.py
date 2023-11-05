@@ -2,7 +2,7 @@ from django import forms
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from . models import (Item, ItemEntry, Unit, Vendor, PurchaseHeader, PurchaseLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, SalesHeader, 
-                      SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine)
+                      SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalEntry)
 
 
 class SalesHeaderForm(forms.ModelForm):
@@ -66,6 +66,14 @@ class PurchaseCreditMemoLineForm(forms.ModelForm):
         fields = ['purchase_line','quantity']
 
 PurchaseCreditMemoLineFormset = forms.inlineformset_factory(PurchaseCreditMemoHeader, PurchaseCreditMemoLine, form=PurchaseCreditMemoLineForm, extra=1)
+
+class ApprovalEntryForm(forms.ModelForm):
+    class Meta:
+        model = ApprovalEntry
+        fields = '__all__'
+        widgets = {
+            'reason': forms.Textarea(attrs={'rows': 3}),  # You can choose an appropriate widget
+        }
 
 
 

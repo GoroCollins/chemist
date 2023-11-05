@@ -3,7 +3,7 @@ from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse, StreamingHttpResponse
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse, StreamingHttpResponse, HttpResponseBadRequest
 from django.contrib import messages
 from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile, ApprovalSetup)
@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django import forms
 from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, PurchaseLineFormset,SalesCreditMemoHeaderForm, SalesCreditMemoLineFormset,
-                     PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset, PurchaseLineReceivingFormset, SalesLineUpdateFormset)
+                     PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset, PurchaseLineReceivingFormset, SalesLineUpdateFormset, ApprovalEntryForm)
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from reportlab.pdfgen import canvas
@@ -27,6 +27,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus.frames import Frame
 from django.db.models import Sum
 import csv
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -114,6 +115,11 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
     def get_object(self, queryset=None):
         pk = self.kwargs.get('pk')
         return get_object_or_404(PurchaseHeader, number=pk)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['messages'] = messages.get_messages(self.request)
+        return context
 
     def post(self, request, pk):
         if request.method == 'POST':
@@ -358,9 +364,50 @@ class ApprovalListView(LoginRequiredMixin, generic.ListView):
     model = ApprovalEntry
     paginate_by = 10
 
+# class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
+#     model = ApprovalEntry
+#     paginate_by =10
+
+#     # def get_context_data(self, **kwargs):
+#     #     context = super().get_context_data(**kwargs)
+        
+#     #     if self.object.status == '3':
+#     #         context['form'] = ApprovalEntryForm(instance=self.object)  # Create an instance of the form
+#     #     else:
+#     #         context['form'] = None
+
+#     #     return context
+
+
 class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalEntry
-    paginate_by =10
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['messages'] = messages.get_messages(self.request)
+        return context
+    #@require_POST
+    def post(self, request, pk):
+        try:
+            approval_entry = get_object_or_404(ApprovalEntry, pk=pk)
+            action = request.POST['action']
+            if action == 'approve':
+                approval_entry.status = 2
+                message = 'Approval entry approved'
+            elif action == 'reject':
+                approval_entry.status = 3
+                message = 'Approval entry rejected'
+            else:
+                messages.error(request, 'Invalid action')
+                return redirect('inventory:approval-detail', pk=pk)
+
+            approval_entry.save()
+            messages.success(request, message)
+            return redirect('inventory:approval-detail', pk=pk)
+        except:
+            messages.error(request, 'Invalid form data')
+            return redirect('inventory:approval-detail', pk=pk)
 
 class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = ApprovalEntry
@@ -565,34 +612,6 @@ class ApprovalSetupUpdateView(LoginRequiredMixin, generic.UpdateView):
     fields = ['approver']
 class ApprovalSetupDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalSetup
-
-# def create_approval_request(request):
-#     if request.method == 'POST':
-#         document_number = request.POST.get('document_number')
-#         amount = request.POST.get('amount')
-
-#         if document_number and amount:
-#             # Find the appropriate approver
-#             try:
-#                 approver_setup = ApprovalSetup.objects.get(user=request.user)
-#                 approver = approver_setup.approver
-#             except ApprovalSetup.DoesNotExist:
-#                 approver = None
-
-#             # Create an ApprovalEntry with the determined approver
-#             ApprovalEntry.objects.create(
-#                 requester=request.user,
-#                 document_number=document_number,
-#                 details="Your details here",
-#                 amount=amount,
-#                 approver=approver  # Set to the appropriate approver or None
-#             )
-#             return JsonResponse({'message': 'Approval request sent'})
-#         else:
-#             return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
-#     else:
-#         return JsonResponse({'error': 'Invalid request method'}, status=400)
-
 
 def sales_pdf(request, pk):
     # Create a response object with the appropriate PDF headers

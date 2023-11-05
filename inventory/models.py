@@ -558,7 +558,7 @@ class ApprovalEntry(models.Model):
         return timezone.now() - self.request_date >= timezone.timedelta(days=5)
     def save(self, *args, **kwargs):
         self.overdue = self.is_overdue
-        self.details = "Amount: " + str(self.amount) + "LPO Number: " + str(self.document_number)
+        self.details = "Amount: " + str(self.amount) + " LPO Number: " + str(self.document_number)
         super(ApprovalEntry, self).save(*args, **kwargs)
     def get_absolute_url(self):
         return reverse('inventory:approval-detail', args=[str(self.id)])
@@ -566,12 +566,19 @@ class ApprovalEntry(models.Model):
     class Meta:
         ordering = ["id"]
         verbose_name_plural = "Approval Entries"
+    # def clean(self):
+    #     # Call the parent's clean method to perform the default validation
+    #     super().clean()
+
+    #     # If the status is 3 (rejected) and the reason is not provided, raise a validation error
+    #     if self.status == 3 and not self.reason:
+    #         raise ValidationError("Reason is required when the approval is rejected.")
 @receiver(post_save, sender=ApprovalEntry)
-def update_purchase_order_approval_status(sender, instance, created, **kwargs):
-    if created:
-            lpo_approval = instance.document_number
-            lpo_approval.status = instance.status
-            lpo_approval.save()
+def update_purchase_order_approval_status(sender, instance, **kwargs):
+    lpo_approval = instance.document_number
+    lpo_approval.status = instance.status
+    lpo_approval.save()
+
 
 class ApprovalSetup(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='user', related_query_name='user')

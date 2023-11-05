@@ -3,16 +3,66 @@
  Approval Details
 {% endblock %}
 {% block content %}
-
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 <h2>Approval Entry Card</h2>
-<!-- <button value="2" name="approve">Approve</button>|<button value="3" name="reject">Reject</button> -->
+<div id="message" style="display: none;"></div>
 {% if approvalentry.status == '1'%}
-<a href="{% url 'inventory:approval-update' approvalentry.id %}">Approve|Reject</a>
+<form id="approval-form" method="post">
+    {% csrf_token %}
+    <!-- Your other form elements here -->
+    <!-- {{ form.as_p }}  -->
+    <button id="approve-approval-request">Approve</button>
+    <button id="reject-approval-request">Reject</button>
+</form>
 {% endif %}
 <ul>
     <li>Requester: {{ approvalentry.requester }}</li>
     <li>Document Number: {{ approvalentry.document_number }}</li>
     <li>Details: {{ approvalentry.details}}</li>
     <li>Amount: {{ approvalentry.amount}}</li>
+    <li>Due Date: {{approvalentry.due_date}}</li>
+    <li>Over Due: {{approvalentry.overdue}}</li>
+    {% if approvalentry.status == '2' or approvalentry == '3'%}
+    <li>Status: {{approvalentry.status}}</li>
+    {% endif %}
 </ul>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function() {
+        $("#approve-approval-request").click(function() {
+            handleApproval('approve');
+        });
+
+        $("#reject-approval-request").click(function() {
+            handleApproval('reject');
+        });
+
+        function handleApproval(action) {
+            var documentNumber = "{{ approvalentry.id }}";
+            var csrfToken = $("input[name='csrfmiddlewaretoken']").val();
+
+            $.ajax({
+                url: "{% url 'inventory:approval-detail' approvalentry.id %}",
+                method: "POST",
+                data: {
+                    document_number: documentNumber,
+                    action: action,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                // success: function(data) {
+                //     $("#message").text(data.message).show();
+                // },
+                // error: function(xhr, status, error) {
+                //     alert("Error: " + error);
+                // }
+            });
+        }
+    });
+</script>
 {% endblock %}

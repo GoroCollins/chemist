@@ -3,6 +3,13 @@
     Purchase Order Details
 {% endblock %}
 {% block content %}
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 <div id="message" style="display: none;"></div>
 <a href="{% url 'inventory:purchaseorders' %}">Purchase Orders List</a>
     <h1>Purchase Order Card</h1>
@@ -64,7 +71,7 @@
         $("#create-approval-request").click(function() {
             var documentNumber = "{{ purchaseheader.number }}";
             var amount = "{{ purchaseheader.total }}";
-            var csrfToken = "{% csrf_token %}";
+            var csrfToken = $("input[name='csrfmiddlewaretoken']").val();
             
             $.ajax({
                 url: "{% url 'inventory:purchaseorder-detail' purchaseheader.number %}",
@@ -74,13 +81,13 @@
                     amount: amount,
                     csrfmiddlewaretoken: csrfToken
                 },
-                success: function(data) {
-                    $("#message").text(data.message).show();
-                    // alert(data.message);
-                },
-                error: function(xhr, status, error) {
-                    alert("Error: " + error);
-                }
+                // success: function(data) {
+                //     $("#message").text(data.message).show();
+                //     // alert(data.message);
+                // },
+                // error: function(xhr, status, error) {
+                //     alert("Error: " + error);
+                // }
             });
         });
     });
