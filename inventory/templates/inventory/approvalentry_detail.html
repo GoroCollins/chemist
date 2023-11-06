@@ -3,6 +3,7 @@
  Approval Details
 {% endblock %}
 {% block content %}
+<a href="{% url 'inventory:approvals'%}"><button>Back</button></a>
 {% if messages %}
   <ul class="messages">
     {% for message in messages %}
@@ -11,7 +12,6 @@
   </ul>
 {% endif %}
 <h2>Approval Entry Card</h2>
-<div id="message" style="display: none;"></div>
 {% if approvalentry.status == '1'%}
 <form id="approval-form" method="post">
     {% csrf_token %}
@@ -28,8 +28,8 @@
     <li>Amount: {{ approvalentry.amount}}</li>
     <li>Due Date: {{approvalentry.due_date}}</li>
     <li>Over Due: {{approvalentry.overdue}}</li>
-    {% if approvalentry.status == '2' or approvalentry == '3'%}
-    <li>Status: {{approvalentry.status}}</li>
+    {% if approvalentry.status == '2' or approvalentry.status == '3' %}
+    <li>Status: {{ approvalentry.status }}</li>
     {% endif %}
 </ul>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -46,6 +46,7 @@
         function handleApproval(action) {
             var documentNumber = "{{ approvalentry.id }}";
             var csrfToken = $("input[name='csrfmiddlewaretoken']").val();
+            console.log(action);
 
             $.ajax({
                 url: "{% url 'inventory:approval-detail' approvalentry.id %}",
@@ -54,13 +55,7 @@
                     document_number: documentNumber,
                     action: action,
                     csrfmiddlewaretoken: csrfToken
-                },
-                // success: function(data) {
-                //     $("#message").text(data.message).show();
-                // },
-                // error: function(xhr, status, error) {
-                //     alert("Error: " + error);
-                // }
+                }
             });
         }
     });

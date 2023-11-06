@@ -1,4 +1,3 @@
-from typing import Any
 from django.db import models
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -16,8 +15,6 @@ from . forms import (SalesHeaderForm, PurchaseHeaderForm, SalesLinesFormset, Pur
                      PurchaseCreditMemoHeaderForm, PurchaseCreditMemoLineFormset, PurchaseLineReceivingFormset, SalesLineUpdateFormset, ApprovalEntryForm)
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-from reportlab.pdfgen import canvas
-import io 
 from django.templatetags.static import static
 from django.contrib.staticfiles import finders
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer, PageTemplate
@@ -27,7 +24,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus.frames import Frame
 from django.db.models import Sum
 import csv
-from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required
@@ -124,32 +121,36 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
     def post(self, request, pk):
         if request.method == 'POST':
             purchase_header = self.get_object()
-            
-            # Retrieve the total value from the PurchaseHeader model and convert it to Decimal
             amount = purchase_header.total
 
             if pk and amount:
-                # Find the appropriate approver
                 try:
                     approver_setup = ApprovalSetup.objects.get(user=request.user)
                     approver = approver_setup.approver
                 except ApprovalSetup.DoesNotExist:
                     approver = None
 
-                # Create an ApprovalEntry with the determined approver
                 ApprovalEntry.objects.create(
                     requester=request.user,
-                    document_number=purchase_header,  # Assign the document number (primary key)
+                    document_number=purchase_header,
                     details="Your details here",
-                    amount=amount,  # Convert the amount to Decimal
+                    amount=amount, 
                     approver=approver,
                     request_date=timezone.now()
                 )
-                return JsonResponse({'message': 'Approval request sent'})
+                # message = 'Approval request sent'
+                messages.success(request, 'Approval request sent')
+                return redirect('inventory:purchaseorder-detail', pk=pk)
+                # return JsonResponse({'message': 'Approval request sent'})
             else:
-                return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
+                #message = 'Missing document_number or amount'
+                messages.error(request, 'Missing document_number or amount')
+                return redirect('inventory:purchaseorder-detail', pk=pk)
+                #return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
         else:
-            return JsonResponse({'error': 'Invalid request method'}, status=400)
+            messages.error(request, 'Invalid request method')
+            return redirect('inventory:purchaseorder-detail', pk=pk)
+            #return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 class PurchaseHeaderInline():
@@ -378,35 +379,39 @@ class ApprovalListView(LoginRequiredMixin, generic.ListView):
 
 #     #     return context
 
-
 class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalEntry
-    paginate_by = 10
+    paginate_by = 25
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['messages'] = messages.get_messages(self.request)
         return context
-    #@require_POST
     def post(self, request, pk):
         try:
             approval_entry = get_object_or_404(ApprovalEntry, pk=pk)
-            action = request.POST['action']
-            if action == 'approve':
-                approval_entry.status = 2
-                message = 'Approval entry approved'
-            elif action == 'reject':
-                approval_entry.status = 3
-                message = 'Approval entry rejected'
-            else:
-                messages.error(request, 'Invalid action')
-                return redirect('inventory:approval-detail', pk=pk)
+        
+            if 'action' in request.POST:
+                action = request.POST['action']
+            
+                if action == 'approve':
+                    approval_entry.status = 2
+                    message = 'Approval entry approved'
+                elif action == 'reject':
+                    approval_entry.status = 3
+                    message = 'Approval entry rejected'
+                else:
+                    messages.error(request, 'Invalid action')
+                    return redirect('inventory:approval-detail', pk=pk)
 
-            approval_entry.save()
-            messages.success(request, message)
-            return redirect('inventory:approval-detail', pk=pk)
+                approval_entry.save()
+                messages.success(request, message)
+                return redirect('inventory:approval-detail', pk=pk)
+            else:
+                messages.error(request, 'Action parameter missing')
+                return redirect('inventory:approval-detail', pk=pk)
         except:
-            messages.error(request, 'Invalid form data')
+            messages.error(request, 'Error processing request')
             return redirect('inventory:approval-detail', pk=pk)
 
 class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):

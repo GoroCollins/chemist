@@ -10,7 +10,6 @@
     {% endfor %}
   </ul>
 {% endif %}
-<div id="message" style="display: none;"></div>
 <a href="{% url 'inventory:purchaseorders' %}">Purchase Orders List</a>
     <h1>Purchase Order Card</h1>
     {% if purchaseheader.status == '2' %}
@@ -80,14 +79,7 @@
                     document_number: documentNumber,
                     amount: amount,
                     csrfmiddlewaretoken: csrfToken
-                },
-                // success: function(data) {
-                //     $("#message").text(data.message).show();
-                //     // alert(data.message);
-                // },
-                // error: function(xhr, status, error) {
-                //     alert("Error: " + error);
-                // }
+                }
             });
         });
     });
