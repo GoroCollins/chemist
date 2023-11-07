@@ -1,13 +1,11 @@
 2. Create consolidated item entries capturing purchases, sales, and returns through a view.
 Implementation of views:
-Give edit option to only update quantity with reasons.(View and form) - allow admin to add a record to item entry table
+Allow admin to add a record to item entry table
 Allow editing of open LPOs - update form pending.
-Receiving approved LPOs - form is pending.
 Implement approvals for LPO.
-       - Once approved cannot be editted and one can cancel approval and edit while open.
-         - added status field with three options {0:'Open', 1:'Pending Approval', 2: 'Approved', 3:'Cancelled'}
-         - when pending approval allow cancellation of users request then set to open(status)
-         - when pending approval admin can approve and set to approved(status) or reject set to open(status) and display comments and force admin to comment
+   - One can cancel approval and edit while open.
+   when pending approval allow cancellation of users request then set to open(status)
+ reject and display comments and force admin to comment, show LPO status to Rejected and show the reasons for rejection on the page.
 Allow admin to open invoice with reasons. Check how updating open invoice is working.
 Details to have sections with clickable section heads to reveal contents
 Testing
