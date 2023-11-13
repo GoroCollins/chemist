@@ -14,6 +14,15 @@ class SalesLinesForm(forms.ModelForm):
     class Meta:
         model = SalesLines
         fields = ['item', 'lpo', 'quantity', 'discount']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['lpo'].widget = forms.Select(attrs={'class': 'item-entry-select'})
+
+        self.fields['lpo'].queryset = ItemEntry.objects.none()
+
+        self.fields['lpo'].widget.attrs['onchange'] = 'updateBatchNumbers()'
 
 SalesLinesFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesForm, can_delete=True, can_delete_extra=True, extra=1)
 

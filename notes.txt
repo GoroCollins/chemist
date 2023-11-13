@@ -3,8 +3,7 @@ Implementation of views:
 Allow admin to add a record to item entry table
 Allow editing of open LPOs - update form pending.
 Implement approvals for LPO.
-   - One can cancel approval and edit while open.
-   when pending approval allow cancellation of users request then set to open(status)
+   - Edit while open.
  reject and display comments and force admin to comment, show LPO status to Rejected and show the reasons for rejection on the page.
 Allow admin to open invoice with reasons. Check how updating open invoice is working.
 Details to have sections with clickable section heads to reveal contents

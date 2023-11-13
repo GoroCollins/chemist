@@ -25,6 +25,7 @@ from reportlab.platypus.frames import Frame
 from django.db.models import Sum
 import csv
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -729,7 +730,17 @@ class Echo:
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
+@require_POST
+def get_batch_numbers(request):
+    item_id = request.POST.get('item_id')  # Assuming you are using POST data
 
+    # Query your database to get batch numbers related to the selected item
+    batch_numbers = ItemEntry.objects.filter(item_entry=item_id).values_list('id', 'name')
+
+    # Convert queryset to a list of dictionaries
+    batch_numbers_list = [{'id': batch_id, 'name': batch_name} for batch_id, batch_name in batch_numbers]
+
+    return JsonResponse({'batch_numbers': batch_numbers_list})
 
 
 
