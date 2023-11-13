@@ -3,6 +3,7 @@
     Purchase Orders
 {% endblock %}
 {% block content %}
+    <a href="{% url 'inventory:cancelled-documents'%}">Cancelled LPOs</a>
     <h1>List of Purchase Orders</h1>
     <a href="{% url 'inventory:purchaseorder-create' %}">Create Purchase Order</a>
     <ul>

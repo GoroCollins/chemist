@@ -61,6 +61,13 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'inventory/index.html', context=context)
+
+def cancelled_documents(request):
+    lpos = PurchaseHeader.objects.filter(status=3)
+    context = {
+        'lpos': lpos
+    }
+    return render(request, 'inventory/cancelled.html', context=context)
 class VendorListView(LoginRequiredMixin, generic.ListView):
     model = Vendor
     paginate_by = 25
