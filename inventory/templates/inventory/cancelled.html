@@ -4,7 +4,7 @@
 <h1>List Cancelled of documents</h1>
 <ul>
     {% for lpo in lpos %}
-    <li><a href="{% url 'inventory:purchaseorder-detail' lpo.number %}">{{lpo.number}}</a>&#124; {{lpo.vendor}}&#124; Ksh.{{lpo.total}}
+    <li><a href="{% url 'inventory:purchaseorder-detail' lpo.number %}">{{lpo.number}}</a>&#124; {{lpo.vendor}}&#124; Ksh.{{lpo.total}}&#124; {{lpo.status}}
     {% endfor %}
 </ul>
 {% endblock content %}
