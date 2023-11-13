@@ -1,2 +1,2 @@
 # chemist
-Inventory management system
+Inventory management system with approvals for purchase documents.
