@@ -130,8 +130,9 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
             purchase_header = self.get_object()
             amount = purchase_header.total
             
-            if ApprovalEntry.objects.get(document_number=purchase_header):
-                approval_entry = ApprovalEntry.objects.get(document_number=purchase_header)
+            approval_entries = ApprovalEntry.objects.filter(document_number=purchase_header).order_by('-request_date')
+            if approval_entries and approval_entries[0].status==1:
+                approval_entry = approval_entries[0]
                 approval_entry.status = 0
                 approval_entry.save()
                 messages.success(request, 'Approval request cancelled')
@@ -163,7 +164,6 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
             messages.error(request, 'Invalid request method')
             return redirect('inventory:purchaseorder-detail', pk=pk)
             #return JsonResponse({'error': 'Invalid request method'}, status=400)
-
 
 class PurchaseHeaderInline():
     form_class = PurchaseHeaderForm
@@ -375,21 +375,7 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderUpdateInline, generic.ed
 
 class ApprovalListView(LoginRequiredMixin, generic.ListView):
     model = ApprovalEntry
-    paginate_by = 10
-
-# class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
-#     model = ApprovalEntry
-#     paginate_by =10
-
-#     # def get_context_data(self, **kwargs):
-#     #     context = super().get_context_data(**kwargs)
-        
-#     #     if self.object.status == '3':
-#     #         context['form'] = ApprovalEntryForm(instance=self.object)  # Create an instance of the form
-#     #     else:
-#     #         context['form'] = None
-
-#     #     return context
+    paginate_by = 30
 
 class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalEntry
@@ -400,18 +386,19 @@ class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
         context['messages'] = messages.get_messages(self.request)
         return context
     def post(self, request, pk):
-        try:
-            approval_entry = get_object_or_404(ApprovalEntry, pk=pk)
-        
+        approval_entry = ApprovalEntry.objects.filter(pk=pk).first()
+    
+        if approval_entry is not None:
             if 'action' in request.POST:
                 action = request.POST['action']
-            
+        
                 if action == 'approve':
                     approval_entry.status = 2
                     message = 'Approval entry approved'
                 elif action == 'reject':
                     approval_entry.status = 3
                     message = 'Approval entry rejected'
+                    return redirect('inventory:approval-update', pk=pk)
                 else:
                     messages.error(request, 'Invalid action')
                     return redirect('inventory:approval-detail', pk=pk)
@@ -422,13 +409,13 @@ class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
             else:
                 messages.error(request, 'Action parameter missing')
                 return redirect('inventory:approval-detail', pk=pk)
-        except:
+        else:
             messages.error(request, 'Error processing request')
             return redirect('inventory:approval-detail', pk=pk)
 
 class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = ApprovalEntry
-    fields = ['status']
+    fields = ['reason']
 
 class SalesCreditMemoListView(LoginRequiredMixin, generic.ListView):
     model = SalesCreditMemoHeader
