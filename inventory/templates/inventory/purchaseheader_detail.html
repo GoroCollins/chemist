@@ -21,7 +21,10 @@
         <button id="create-approval-request">Send Approval Request</button>
     </form> | <a href="{% url 'inventory:purchaseorder-update' purchaseheader.number %}">Edit</a>
     {% elif purchaseheader.status == '1' %}
-        <button>Cancel Approval Request</button>
+    <form method="post">
+        {% csrf_token %}
+        <button id="cancel-approval-request">Cancel Approval Request</button>
+    </form>
     {% elif purchaseheader.status == '3' %}
     {% endif %}
     <ul>
@@ -67,21 +70,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     $(document).ready(function() {
-        $("#create-approval-request").click(function() {
+        $("#create-approval-request, #cancel-approval-request").click(function() {
             var documentNumber = "{{ purchaseheader.number }}";
             var amount = "{{ purchaseheader.total }}";
             var csrfToken = $("input[name='csrfmiddlewaretoken']").val();
-            
+            var action = $(this).attr('id') === 'create-approval-request' ? 'create' : 'cancel';
+
             $.ajax({
                 url: "{% url 'inventory:purchaseorder-detail' purchaseheader.number %}",
                 method: "POST",
                 data: {
                     document_number: documentNumber,
                     amount: amount,
+                    action: action,
                     csrfmiddlewaretoken: csrfToken
+                },
+                success: function(data) {
+                    // Handle success response, if needed
+                    console.log(data.message);
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response, if needed
+                    console.error("Error: " + error);
                 }
             });
         });
     });
 </script>
+
 {% endblock %}

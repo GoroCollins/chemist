@@ -61,7 +61,7 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'inventory/index.html', context=context)
-
+@login_required
 def cancelled_documents(request):
     lpos = PurchaseHeader.objects.filter(status=3)
     context = {
@@ -129,31 +129,36 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
         if request.method == 'POST':
             purchase_header = self.get_object()
             amount = purchase_header.total
-
-            if pk and amount:
-                try:
-                    approver_setup = ApprovalSetup.objects.get(user=request.user)
-                    approver = approver_setup.approver
-                except ApprovalSetup.DoesNotExist:
-                    approver = None
-
-                ApprovalEntry.objects.create(
-                    requester=request.user,
-                    document_number=purchase_header,
-                    details="Your details here",
-                    amount=amount, 
-                    approver=approver,
-                    request_date=timezone.now()
-                )
-                # message = 'Approval request sent'
-                messages.success(request, 'Approval request sent')
+            
+            if ApprovalEntry.objects.get(document_number=purchase_header):
+                approval_entry = ApprovalEntry.objects.get(document_number=purchase_header)
+                approval_entry.status = 0
+                approval_entry.save()
+                messages.success(request, 'Approval request cancelled')
                 return redirect('inventory:purchaseorder-detail', pk=pk)
-                # return JsonResponse({'message': 'Approval request sent'})
             else:
-                #message = 'Missing document_number or amount'
-                messages.error(request, 'Missing document_number or amount')
-                return redirect('inventory:purchaseorder-detail', pk=pk)
-                #return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
+                if pk and amount:
+                    try:
+                        approver_setup = ApprovalSetup.objects.get(user=request.user)
+                        approver = approver_setup.approver
+                    except ApprovalSetup.DoesNotExist:
+                        approver = None 
+                    
+                    ApprovalEntry.objects.create(
+                        requester=request.user,
+                        document_number=purchase_header,
+                        details="Your details here",
+                        amount=amount, 
+                        approver=approver,
+                        request_date=timezone.now()
+                    )
+                    messages.success(request, 'Approval request sent')
+                    return redirect('inventory:purchaseorder-detail', pk=pk)
+                    # return JsonResponse({'message': 'Approval request sent'})
+                else:
+                    messages.error(request, 'Missing document_number or amount')
+                    return redirect('inventory:purchaseorder-detail', pk=pk)
+                    #return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
         else:
             messages.error(request, 'Invalid request method')
             return redirect('inventory:purchaseorder-detail', pk=pk)
