@@ -16,3 +16,4 @@ Testing
 6. Use templates for enforcing permissions: look at UserPassesTestMixin mixin
 7. ModelChoiceFilter - for filtering the lists
 8. use div float for displaying multiple options in one line
+9. Review new_purchase.html and new_sale.html
