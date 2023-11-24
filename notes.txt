@@ -15,16 +15,4 @@ Testing
 5. Use @cached_property
 6. Use templates for enforcing permissions: look at UserPassesTestMixin mixin
 7. ModelChoiceFilter - for filtering the lists
------------------------------------------Retrieve Approval button value---------------------
-if (request.method == "POST):
-   if (request.POST.get('btn-1', False)):
-       new_value_button = ValueButtons(value=request.POST.get(
-'btn-1'))
-       new_value_button.save()
-----------------------------------------------------------------------
-   Updating the receive order template 
-                   <!-- {% else %}
-                    {{field}}
-                {% endif %} -->
-               {{ field.value.vendor.vendor}}
------------------------------------------------------------------
+8. use div float for displaying multiple options in one line
