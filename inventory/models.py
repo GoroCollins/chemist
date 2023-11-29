@@ -237,8 +237,8 @@ class PurchaseHeader(models.Model):
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled'))
     status = models.CharField(max_length=30, choices=approval_status, default=0)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
-    modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
+    modified_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -322,7 +322,7 @@ class PurchaseCreditMemoHeader(models.Model):
     vendor = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='memo', related_query_name='memo')
     date = models.DateField(auto_now=True)
     amount = models.PositiveBigIntegerField()
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -421,7 +421,7 @@ class SalesHeader(models.Model):
     date = models.DateField(auto_now=True)
     amount = models.FloatField(editable=False, default=0)
     finalize = models.BooleanField(default=True)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
     def save(self, *args, **kwargs):
         user = get_current_user()
         if user and not user.pk:
@@ -477,7 +477,7 @@ class SalesCreditMemoHeader(models.Model):
     date = models.DateField(auto_now=True) # put date logic (should not be earlier than invoice date but can equal invice date)
     invoice_no = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='credit_memo', related_query_name='credit_memo')
     amount = models.PositiveIntegerField(default=0)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -541,7 +541,6 @@ class ApprovalEntry(models.Model):
     approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled'))
     status = models.CharField(max_length=20, choices=approval_status, default=1)
     approver = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
-    #amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')
     amount = models.DecimalField(decimal_places=2, max_digits=10)
     request_date = models.DateTimeField(auto_now_add=True)
     last_modified_at = models.DateTimeField(auto_now=True)
@@ -566,13 +565,6 @@ class ApprovalEntry(models.Model):
     class Meta:
         ordering = ["id"]
         verbose_name_plural = "Approval Entries"
-    # def clean(self):
-    #     # Call the parent's clean method to perform the default validation
-    #     super().clean()
-
-    #     # If the status is 3 (rejected) and the reason is not provided, raise a validation error
-    #     if self.status == 3 and not self.reason:
-    #         raise ValidationError("Reason is required when the approval is rejected.")
 @receiver(post_save, sender=ApprovalEntry)
 def update_purchase_order_approval_status(sender, instance, **kwargs):
     lpo_approval = instance.document_number
