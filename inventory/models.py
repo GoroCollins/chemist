@@ -584,14 +584,6 @@ class ApprovalSetup(models.Model):
         return f"User:{self.user}   Approver:{self.approver}"
     def get_absolute_url(self):
         return reverse('inventory:approvalsetup-detail', args=[str(self.id)])
-    def save(self, *args, **kwargs):
-        user = get_current_user()
-        if user and not user.pk:
-            user = None
-        if not self.pk:
-            self.modified_by = user
-        # self.created_by = user
-        super(ApprovalSetup, self).save(*args, **kwargs)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
