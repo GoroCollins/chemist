@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponse, Http404, JsonResponse, FileResponse, StreamingHttpResponse, HttpResponseBadRequest
 from django.contrib import messages
-from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
+from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLine, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile, ApprovalSetup)
 from django.views import generic, View
 from django.template import loader
@@ -630,7 +630,7 @@ def sales_pdf(request, pk):
     data = [['Item', 'Batch Number', 'Quantity', 'Unit Price', 'Discount', 'Line Amount']]
     sales_header = get_object_or_404(SalesHeader, pk=pk)
     # Fetch related sales lines
-    sales_lines = SalesLines.objects.filter(number=sales_header)
+    sales_lines = SalesLine.objects.filter(number=sales_header)
     for row in sales_lines:
         data.append([row.item, row.batch, row.quantity, row.unit_price, row.discount, row.total])
         # Create a list to hold the elements (text, image, and table)
