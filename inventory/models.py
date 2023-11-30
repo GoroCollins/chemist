@@ -235,8 +235,9 @@ class PurchaseHeader(models.Model):
     date = models.DateField(auto_now_add=True, editable=False)
     total = models.DecimalField(editable=False, default=0, max_digits=10, decimal_places=2)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled'))
-    status = models.CharField(max_length=30, choices=approval_status, default=0)
+    Open = 0; Pending_Approval = 1; Approved = 2; Cancelled = 3
+    approval_status = ((Open, 'Open'), (Pending_Approval, 'Pending Approval'), (Approved, 'Approved'), (Cancelled, 'Cancelled'))
+    status = models.CharField(max_length=30, choices=approval_status, default=Open)
     created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
     modified_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
 
