@@ -166,6 +166,7 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
             return redirect('inventory:purchaseorder-detail', pk=pk)
             #return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+# This is for DRY; the class is used for creation and updating
 class PurchaseHeaderInline():
     form_class = PurchaseHeaderForm
     model = PurchaseHeader

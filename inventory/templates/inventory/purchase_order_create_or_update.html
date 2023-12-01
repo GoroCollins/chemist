@@ -72,8 +72,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
-            <button id="add-purchaselines-button" class="btn btn-secondary add-lines">Add More</button>
+            <button id="add-purchaselines-button" class="btn btn-secondary add-lines">Add More</button> <!--add-inlineformsetname-button-->
         </div>
         
         {% endwith %}
@@ -87,7 +86,6 @@
 
 <script>
   $(document).ready(function() {
-    // when user clicks add more btn of variants
       $('.add-lines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-purchaselines').children().length;
