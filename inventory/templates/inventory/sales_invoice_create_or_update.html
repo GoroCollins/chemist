@@ -25,11 +25,6 @@
         {% endfor %}
     </div>
 
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
     {% with named_formsets.saleslines as formset %}
         {{ formset.management_form }}
         <script type="text/html" id="saleslines-template">   <!--id="inlineformsetname-template"-->
@@ -94,7 +89,6 @@
 
 <script>
   $(document).ready(function() {
-    // when user clicks add more btn of variants
       $('.add-saleslines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-saleslines').children().length;

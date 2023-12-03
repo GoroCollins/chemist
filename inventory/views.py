@@ -179,12 +179,12 @@ class PurchaseHeaderInline():
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
-                formset_save_func(formset)
+                formset_save_func(formset) # executes formset_purchaselines_valid function below
             else:
                 formset.save()
         url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
-    
+    # custom save function for purchaselines formset
     def formset_purchaselines_valid(self, formset):
         purchaselines = formset.save(commit=False) 
         for obj in formset.deleted_objects:
