@@ -3,7 +3,6 @@
 {% block content %}
 <form enctype="multipart/form-data" class="container" method="post" id="product_form">
     {% csrf_token %}
-    <!-- main form start --- in our case product form -->
     <div class="card">
         <div class="card-header card-header-secondary">
             <h4 class="card-title">Purchase Credit Memo Header</h4>
@@ -27,8 +26,7 @@
     </div>
     {% with named_formsets.purchasememolines as formset %}
         {{ formset.management_form }}
-        <script type="text/html" id="purchasememolines-template">  // id="inlineformsetname-template"
-            // id='inlineformsetname-__prefix__' 
+        <script type="text/html" id="purchasememolines-template"> 
             <tr id="purchasememolines-__prefix__" class= hide_all>
                 {% for fields in formset.empty_form.hidden_fields %}
                     {{ fields }}
@@ -49,14 +47,13 @@
                     <th>Quantity <span style="color: red;" class="required">*</span></th>
                     <th>Delete?</th>
                 </thead>
-                <tbody id="item-purchasememolines">  <!-- id="item-inlineformsetname" -->
-                    <!-- formset non forms errors -->
+                <tbody id="item-purchasememolines">  
                     {% for error in formset.non_form_errors %}
                         <span style="color: red">{{ error }}</span>
                     {% endfor %}
                     {% for formss in formset %}
                         {{ formss.management_form }}
-                        <tr id="purchasememolines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                        <tr id="purchasememolines-{{ forloop.counter0 }}" class= hide_all> 
                             {{ formss.id }}
                             {% for field in formss.visible_fields %}
                                 <td>
@@ -64,20 +61,16 @@
                                     {% for error in field.errors %}
                                         <span style="color: red">{{ error }}</span>
                                     {% endfor %}
-                                    
-                                    {% comment %} {{ field.DELETE }} {% endcomment %}
                                 </td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
             <button id="add-purchasememolines-button" class="btn btn-secondary add-lines">Add More</button>
         </div>
         
         {% endwith %}
-        <!-- inline form for Images end -->
 
         <div class="form-group">
             <button type="submit" class="btn btn-secondary btn-block">Submit</button>
@@ -88,7 +81,6 @@
 
 <script>
   $(document).ready(function() {
-    // when user clicks add more btn of variants
       $('.add-lines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-purchasememolines').children().length;
@@ -97,7 +89,7 @@
           $('#item-purchasememolines').append(compiledTmpl);
   
           // update form count
-          $('#id_purchasememolines-TOTAL_FORMS').attr('value', count+1);
+          $('#id_lines-TOTAL_FORMS').attr('value', count+1);
       });
   });
 </script>
