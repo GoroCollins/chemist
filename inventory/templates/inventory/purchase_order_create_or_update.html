@@ -26,8 +26,7 @@
     </div>
     {% with named_formsets.purchaselines as formset %}
         {{ formset.management_form }}
-        <script type="text/html" id="purchaselines-template">  // id="inlineformsetname-template"
-            // id='inlineformsetname-__prefix__' 
+        <script type="text/html" id="purchaselines-template">
             <tr id="purchaselines-__prefix__" class= hide_all>
                 {% for fields in formset.empty_form.hidden_fields %}
                     {{ fields }}
@@ -49,14 +48,13 @@
                     <th>Unit Price <span style="color: red;" class="required">*</span></th>
                     <th>Delete?</th>
                 </thead>
-                <tbody id="item-purchaselines">  <!-- id="item-inlineformsetname" -->
-                    <!-- formset non forms errors -->
+                <tbody id="item-purchaselines">
                     {% for error in formset.non_form_errors %}
                         <span style="color: red">{{ error }}</span>
                     {% endfor %}
                     {% for formss in formset %}
                         {{ formss.management_form }}
-                        <tr id="purchaselines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                        <tr id="purchaselines-{{ forloop.counter0 }}" class= hide_all>
                             {{ formss.id }}
                             {% for field in formss.visible_fields %}
                                 <td>
@@ -64,15 +62,13 @@
                                     {% for error in field.errors %}
                                         <span style="color: red">{{ error }}</span>
                                     {% endfor %}
-                                    
-                                    {% comment %} {{ field.DELETE }} {% endcomment %}
                                 </td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <button id="add-purchaselines-button" class="btn btn-secondary add-lines">Add More</button> <!--add-inlineformsetname-button-->
+            <button id="add-purchaselines-button" class="btn btn-secondary add-lines">Add More</button>
         </div>
         
         {% endwith %}
@@ -87,14 +83,14 @@
 <script>
   $(document).ready(function() {
       $('.add-lines').click(function(ev) {
-          ev.preventDefault();
-          var count = $('#item-purchaselines').children().length;
+          ev.preventDefault(); // prevent default behavior of the clicked element
+          var count = $('#item-purchaselines').children().length; // calculates current number of rows in the table/ already filled
           var tmplMarkup = $('#purchaselines-template').html();
-          var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
-          $('#item-purchaselines').append(compiledTmpl);
+          var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count); // replaces every occurrence of __prefix__ with the current count 
+          $('#item-purchaselines').append(compiledTmpl); // adds a new row 
   
           // update form count
-          $('#id_purchaselines-TOTAL_FORMS').attr('value', count+1);
+          $('#id_lines-TOTAL_FORMS').attr('value', count+1); // id = id_related_name-TOTAL_FORMS and the field is hidden
       });
   });
 </script>

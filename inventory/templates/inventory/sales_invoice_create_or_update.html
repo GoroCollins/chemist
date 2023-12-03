@@ -25,11 +25,6 @@
         {% endfor %}
     </div>
 
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
     {% with named_formsets.saleslines as formset %}
         {{ formset.management_form }}
         <script type="text/html" id="saleslines-template">   <!--id="inlineformsetname-template"-->
@@ -56,14 +51,13 @@
                     <th>Discount <span style="color: red;" class="required">*</span></th>
                     <th>Delete?</th>
                 </thead>
-                <tbody id="item-saleslines">  <!-- id="item-inlineformsetname" -->
-                    <!-- formset non forms errors -->
+                <tbody id="item-saleslines"> 
                     {% for error in formset.non_form_errors %}
                         <span style="color: red">{{ error }}</span>
                     {% endfor %}
                     {% for formss in formset %}
                         {{ formss.management_form }}
-                        <tr id="saleslines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                        <tr id="saleslines-{{ forloop.counter0 }}" class= hide_all> 
                             {{ formss.id }}
                             {% for field in formss.visible_fields %}
                                 <td>
@@ -71,15 +65,12 @@
                                     {% for error in field.errors %}
                                         <span style="color: red">{{ error }}</span>
                                     {% endfor %}
-                                    
-                                    {% comment %} {{ field.DELETE }} {% endcomment %}
                                 </td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
             <button id="add-saleslines-button" class="btn btn-secondary add-saleslines">Add More</button>
         </div>
         
@@ -94,7 +85,6 @@
 
 <script>
   $(document).ready(function() {
-    // when user clicks add more btn of variants
       $('.add-saleslines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-saleslines').children().length;
@@ -103,7 +93,7 @@
           $('#item-saleslines').append(compiledTmpl);
   
           // update form count
-          $('#id_saleslines-TOTAL_FORMS').attr('value', count+1);
+          $('#id_lines-TOTAL_FORMS').attr('value', count+1);
       });
   });
   function updateBatchNumbers() {
