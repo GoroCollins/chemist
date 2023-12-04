@@ -311,7 +311,6 @@ class PurchaseLine(models.Model):
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
-    if created:
         lpo_header = instance.number
         total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
         lpo_header.total = total_amount or 0
