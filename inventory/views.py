@@ -241,7 +241,7 @@ class PurchaseHeaderReceivingInline():
         url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
-    def formset_purchaselines_valid(self, formset):
+    def formset_purchaselinesreceive_valid(self, formset):
         purchaselinesreceive = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
@@ -321,9 +321,6 @@ class SalesHeaderUpdateInline():
         if not all((x.is_valid() for x in named_formsets.values())):
             return self.render_to_response(self.get_context_data(form=form))
         self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
@@ -333,7 +330,7 @@ class SalesHeaderUpdateInline():
         url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
-    def formset_saleslines_valid(self, formset):
+    def formset_saleslinesupdate_valid(self, formset):
         saleslinesupdate = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
