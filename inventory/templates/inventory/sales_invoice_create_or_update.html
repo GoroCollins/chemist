@@ -25,15 +25,10 @@
         {% endfor %}
     </div>
 
-    <!-- inline form for Variant start -->
-
-    <!-- EXPLAINING with named_formsets.variants as formset -->
-    <!-- Note: named_formsets is used in get_context_data function in views.py -->
-    <!-- Note: here variants is our VariantFormSet name, used in get_named_formsets function in views.py -->
     {% with named_formsets.saleslines as formset %}
         {{ formset.management_form }}
-        <script type="text/html" id="saleslines-template">  // id="inlineformsetname-template"
-            // id='inlineformsetname-__prefix__' 
+        <script type="text/html" id="saleslines-template">   <!--id="inlineformsetname-template"-->
+            <!--id='inlineformsetname-__prefix__' -->
             <tr id="saleslines-__prefix__" class= hide_all>
                 {% for fields in formset.empty_form.hidden_fields %}
                     {{ fields }}
@@ -50,20 +45,19 @@
             </div>
             <table class="table card-header">
                 <thead class="text-secondary">
-                    <th>Item <span style="color: red;" class="required">*</span></th>
-                    <th>Item entry <span style="color: red;" class="required">*</span></th>
+                    <th>Item <span id='id_item' style="color: red;" class="required">*</span></th>
+                    <th>Item entry <span id='id_lpo' style="color: red;" class="required">*</span></th>
                     <th>Quantity <span style="color: red;" class="required">*</span></th>
                     <th>Discount <span style="color: red;" class="required">*</span></th>
                     <th>Delete?</th>
                 </thead>
-                <tbody id="item-saleslines">  <!-- id="item-inlineformsetname" -->
-                    <!-- formset non forms errors -->
+                <tbody id="item-saleslines"> 
                     {% for error in formset.non_form_errors %}
                         <span style="color: red">{{ error }}</span>
                     {% endfor %}
                     {% for formss in formset %}
                         {{ formss.management_form }}
-                        <tr id="saleslines-{{ forloop.counter0 }}" class= hide_all>  <!-- id="inlineformsetname-counter" -->
+                        <tr id="saleslines-{{ forloop.counter0 }}" class= hide_all> 
                             {{ formss.id }}
                             {% for field in formss.visible_fields %}
                                 <td>
@@ -71,16 +65,13 @@
                                     {% for error in field.errors %}
                                         <span style="color: red">{{ error }}</span>
                                     {% endfor %}
-                                    
-                                    {% comment %} {{ field.DELETE }} {% endcomment %}
                                 </td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <!--<a href="#" id="add-saleslines-button" class="btn btn-secondary add-lines">Add More</a> id="add-inlineformsetname-button" -->
-            <button id="add-saleslines-button" class="btn btn-secondary add-slines">Add More</button>
+            <button id="add-saleslines-button" class="btn btn-secondary add-saleslines">Add More</button>
         </div>
         
         {% endwith %}
@@ -90,13 +81,11 @@
         </div>
 </form>
 
-<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
   $(document).ready(function() {
-    // when user clicks add more btn of variants
-      $('.add-slines').click(function(ev) {
+      $('.add-saleslines').click(function(ev) {
           ev.preventDefault();
           var count = $('#item-saleslines').children().length;
           var tmplMarkup = $('#saleslines-template').html();
@@ -104,9 +93,27 @@
           $('#item-saleslines').append(compiledTmpl);
   
           // update form count
-          $('#id_saleslines-TOTAL_FORMS').attr('value', count+1);
+          $('#id_lines-TOTAL_FORMS').attr('value', count+1);
       });
   });
+  function updateBatchNumbers() {
+        // Get the selected item's ID
+        var itemId = $('#id_item').val();
+        
+        // Make an AJAX request to fetch batch numbers for the selected item
+        $.ajax({
+            url: "{% url 'inventory:get_batch_numbers' %}", 
+            data: {'item_id': itemId},
+            success: function(data) {
+                // Update the batch numbers options in the form
+                var options = '<option value="">---------</option>';
+                for (var i = 0; i < data.batch_numbers.length; i++) {
+                    options += '<option value="' + data.batch_numbers[i].id + '">' + data.batch_numbers[i].name + '</option>';
+                }
+                $('#id_lpo').html(options);
+            }
+        });
+    }
 </script>
         
 {% endblock content %}

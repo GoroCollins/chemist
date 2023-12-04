@@ -3,8 +3,7 @@ Implementation of views:
 Allow admin to add a record to item entry table
 Allow editing of open LPOs - update form pending.
 Implement approvals for LPO.
-   - One can cancel approval and edit while open.
-   when pending approval allow cancellation of users request then set to open(status)
+   - Edit while open.
  reject and display comments and force admin to comment, show LPO status to Rejected and show the reasons for rejection on the page.
 Allow admin to open invoice with reasons. Check how updating open invoice is working.
 Details to have sections with clickable section heads to reveal contents
@@ -16,16 +15,5 @@ Testing
 5. Use @cached_property
 6. Use templates for enforcing permissions: look at UserPassesTestMixin mixin
 7. ModelChoiceFilter - for filtering the lists
------------------------------------------Retrieve Approval button value---------------------
-if (request.method == "POST):
-   if (request.POST.get('btn-1', False)):
-       new_value_button = ValueButtons(value=request.POST.get(
-'btn-1'))
-       new_value_button.save()
-----------------------------------------------------------------------
-   Updating the receive order template 
-                   <!-- {% else %}
-                    {{field}}
-                {% endif %} -->
-               {{ field.value.vendor.vendor}}
------------------------------------------------------------------
+8. use div float for displaying multiple options in one line
+9. Review new_purchase.html and new_sale.html

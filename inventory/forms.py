@@ -2,7 +2,7 @@ from django import forms
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from . models import (Item, ItemEntry, Unit, Vendor, PurchaseHeader, PurchaseLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, SalesHeader, 
-                      SalesLines, SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalEntry)
+                      SalesLine, SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalEntry)
 
 
 class SalesHeaderForm(forms.ModelForm):
@@ -12,17 +12,26 @@ class SalesHeaderForm(forms.ModelForm):
 
 class SalesLinesForm(forms.ModelForm):
     class Meta:
-        model = SalesLines
+        model = SalesLine
         fields = ['item', 'lpo', 'quantity', 'discount']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-SalesLinesFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesForm, can_delete=True, can_delete_extra=True, extra=1)
+        self.fields['lpo'].widget = forms.Select(attrs={'class': 'item-entry-select'})
+
+        self.fields['lpo'].queryset = ItemEntry.objects.none()
+
+        self.fields['lpo'].widget.attrs['onchange'] = 'updateBatchNumbers()'
+
+SalesLinesFormset = forms.inlineformset_factory(SalesHeader, SalesLine, form=SalesLinesForm, can_delete=True, can_delete_extra=True, extra=1)
 
 class SalesLinesUpdateForm(forms.ModelForm):
     class Meta:
-        model = SalesLines 
+        model = SalesLine 
         fields = ['item', 'lpo', 'quantity', 'discount']
 
-SalesLineUpdateFormset = forms.inlineformset_factory(SalesHeader, SalesLines, form=SalesLinesUpdateForm, can_delete=False, extra=0)
+SalesLineUpdateFormset = forms.inlineformset_factory(SalesHeader, SalesLine, form=SalesLinesUpdateForm, can_delete=False, extra=0)
 
 class PurchaseHeaderForm(forms.ModelForm):
     class Meta:

@@ -235,10 +235,11 @@ class PurchaseHeader(models.Model):
     date = models.DateField(auto_now_add=True, editable=False)
     total = models.DecimalField(editable=False, default=0, max_digits=10, decimal_places=2)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    approval_status = ((0, 'Open'), (1, 'Pending Approval'), (2, 'Approved'), (3, 'Cancelled'))
-    status = models.CharField(max_length=30, choices=approval_status, default=0)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
-    modified_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
+    Open = 0; Pending_Approval = 1; Approved = 2; Cancelled = 3
+    approval_status = ((Open, 'Open'), (Pending_Approval, 'Pending Approval'), (Approved, 'Approved'), (Cancelled, 'Cancelled'))
+    status = models.CharField(max_length=30, choices=approval_status, default=Open)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo', related_query_name='lpo',editable=False)
+    modified_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='lpo_m', related_query_name='lpo_m',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -311,7 +312,6 @@ class PurchaseLine(models.Model):
 
 @receiver(post_save, sender=PurchaseLine)
 def update_lpo_total(sender, instance, created, **kwargs):
-    if created:
         lpo_header = instance.number
         total_amount = lpo_header.lines.filter(number__total=0).aggregate(total=Sum('total'))['total']
         lpo_header.total = total_amount or 0
@@ -322,7 +322,7 @@ class PurchaseCreditMemoHeader(models.Model):
     vendor = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='memo', related_query_name='memo')
     date = models.DateField(auto_now=True)
     amount = models.PositiveBigIntegerField()
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -421,7 +421,7 @@ class SalesHeader(models.Model):
     date = models.DateField(auto_now=True)
     amount = models.FloatField(editable=False, default=0)
     finalize = models.BooleanField(default=True)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
     def save(self, *args, **kwargs):
         user = get_current_user()
         if user and not user.pk:
@@ -438,7 +438,7 @@ class SalesHeader(models.Model):
         verbose_name_plural = 'Sales Invoices'
         ordering = ["number"]
 
-class SalesLines(models.Model):
+class SalesLine(models.Model):
     number = models.ForeignKey(SalesHeader, on_delete=models.CASCADE, related_name='lines', related_query_name='lines')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='invoices', related_query_name='invoices')
     batch = models.CharField(max_length=100, null=True)
@@ -460,10 +460,10 @@ class SalesLines(models.Model):
                 else:
                     item_entry.save()
         self.total = (self.quantity * self.unit_price) * (1- self.discount/100)
-        super(SalesLines, self).save(*args, **kwargs)
+        super(SalesLine, self).save(*args, **kwargs)
     def __str__(self) -> str:
         return f'{self.number}'
-@receiver(post_save, sender=SalesLines)
+@receiver(post_save, sender=SalesLine)
 def update_invoice_total(sender, instance, created, **kwargs):
     if created:
         sales_header = instance.number
@@ -475,9 +475,9 @@ class SalesCreditMemoHeader(models.Model):
     number = SalesCreditMemo(primary_key=True, editable=False)
     customer = models.CharField(max_length=200)
     date = models.DateField(auto_now=True) # put date logic (should not be earlier than invoice date but can equal invice date)
-    invoice_no = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='credit_memo', related_query_name='credit_memo')
+    invoice_no = models.ForeignKey(SalesLine, on_delete=models.PROTECT, related_name='credit_memo', related_query_name='credit_memo')
     amount = models.PositiveIntegerField(default=0)
-    created_by = models.ForeignKey('auth.User', blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -500,7 +500,7 @@ class SalesCreditMemoHeader(models.Model):
 class SalesCreditMemoLine(models.Model):
     number = models.ForeignKey(SalesCreditMemoHeader, on_delete=models.PROTECT, related_name='lines', related_query_name='lines')
     item = models.CharField(help_text='Item to return', max_length=100)
-    sales_line = models.ForeignKey(SalesLines, on_delete=models.PROTECT, related_name='sales_line', related_query_name='sales_line')
+    sales_line = models.ForeignKey(SalesLine, on_delete=models.PROTECT, related_name='sales_line', related_query_name='sales_line')
     batch = models.CharField(help_text='Batch number to return', max_length=100)
     unit_price = models.PositiveIntegerField(editable=False)
     quantity = models.PositiveIntegerField()
@@ -541,7 +541,6 @@ class ApprovalEntry(models.Model):
     approval_status = ((0,'Open'), (1,'Pending Approval'), (2,'Approved'), (3,'Cancelled'))
     status = models.CharField(max_length=20, choices=approval_status, default=1)
     approver = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='approver', related_query_name='approver')
-    #amount = models.ForeignKey(PurchaseHeader, on_delete=models.PROTECT, related_name='approval_amount', related_query_name='approval_amount')
     amount = models.DecimalField(decimal_places=2, max_digits=10)
     request_date = models.DateTimeField(auto_now_add=True)
     last_modified_at = models.DateTimeField(auto_now=True)
@@ -566,13 +565,6 @@ class ApprovalEntry(models.Model):
     class Meta:
         ordering = ["id"]
         verbose_name_plural = "Approval Entries"
-    # def clean(self):
-    #     # Call the parent's clean method to perform the default validation
-    #     super().clean()
-
-    #     # If the status is 3 (rejected) and the reason is not provided, raise a validation error
-    #     if self.status == 3 and not self.reason:
-    #         raise ValidationError("Reason is required when the approval is rejected.")
 @receiver(post_save, sender=ApprovalEntry)
 def update_purchase_order_approval_status(sender, instance, **kwargs):
     lpo_approval = instance.document_number
@@ -592,14 +584,6 @@ class ApprovalSetup(models.Model):
         return f"User:{self.user}   Approver:{self.approver}"
     def get_absolute_url(self):
         return reverse('inventory:approvalsetup-detail', args=[str(self.id)])
-    def save(self, *args, **kwargs):
-        user = get_current_user()
-        if user and not user.pk:
-            user = None
-        if not self.pk:
-            self.modified_by = user
-        # self.created_by = user
-        super(ApprovalSetup, self).save(*args, **kwargs)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

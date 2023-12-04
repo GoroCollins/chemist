@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.http import HttpResponse, Http404, JsonResponse, FileResponse, StreamingHttpResponse, HttpResponseBadRequest
 from django.contrib import messages
-from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLines, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
+from .models import (Item, ItemEntry, PurchaseHeader, PurchaseLine, SalesHeader, SalesLine, Vendor, Unit, ApprovalEntry, SalesCreditMemoHeader, 
                      SalesCreditMemoLine, PurchaseCreditMemoHeader, PurchaseCreditMemoLine, Profile, ApprovalSetup)
 from django.views import generic, View
 from django.template import loader
@@ -25,6 +25,7 @@ from reportlab.platypus.frames import Frame
 from django.db.models import Sum
 import csv
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -61,6 +62,13 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'inventory/index.html', context=context)
+@login_required
+def cancelled_documents(request):
+    lpos = PurchaseHeader.objects.filter(status=3)
+    context = {
+        'lpos': lpos
+    }
+    return render(request, 'inventory/cancelled.html', context=context)
 class VendorListView(LoginRequiredMixin, generic.ListView):
     model = Vendor
     paginate_by = 25
@@ -122,37 +130,43 @@ class PurchaseHeaderDetailView(LoginRequiredMixin, generic.DetailView):
         if request.method == 'POST':
             purchase_header = self.get_object()
             amount = purchase_header.total
-
-            if pk and amount:
-                try:
-                    approver_setup = ApprovalSetup.objects.get(user=request.user)
-                    approver = approver_setup.approver
-                except ApprovalSetup.DoesNotExist:
-                    approver = None
-
-                ApprovalEntry.objects.create(
-                    requester=request.user,
-                    document_number=purchase_header,
-                    details="Your details here",
-                    amount=amount, 
-                    approver=approver,
-                    request_date=timezone.now()
-                )
-                # message = 'Approval request sent'
-                messages.success(request, 'Approval request sent')
+            
+            approval_entries = ApprovalEntry.objects.filter(document_number=purchase_header).order_by('-request_date')
+            if approval_entries and approval_entries[0].status==1:
+                approval_entry = approval_entries[0]
+                approval_entry.status = 0
+                approval_entry.save()
+                messages.success(request, 'Approval request cancelled')
                 return redirect('inventory:purchaseorder-detail', pk=pk)
-                # return JsonResponse({'message': 'Approval request sent'})
             else:
-                #message = 'Missing document_number or amount'
-                messages.error(request, 'Missing document_number or amount')
-                return redirect('inventory:purchaseorder-detail', pk=pk)
-                #return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
+                if pk and amount:
+                    try:
+                        approver_setup = ApprovalSetup.objects.get(user=request.user)
+                        approver = approver_setup.approver
+                    except ApprovalSetup.DoesNotExist:
+                        approver = None 
+                    
+                    ApprovalEntry.objects.create(
+                        requester=request.user,
+                        document_number=purchase_header,
+                        details="Your details here",
+                        amount=amount, 
+                        approver=approver,
+                        request_date=timezone.now()
+                    )
+                    messages.success(request, 'Approval request sent')
+                    return redirect('inventory:purchaseorder-detail', pk=pk)
+                    # return JsonResponse({'message': 'Approval request sent'})
+                else:
+                    messages.error(request, 'Missing document_number or amount')
+                    return redirect('inventory:purchaseorder-detail', pk=pk)
+                    #return JsonResponse({'error': 'Missing document_number or amount'}, status=400)
         else:
             messages.error(request, 'Invalid request method')
             return redirect('inventory:purchaseorder-detail', pk=pk)
             #return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
+# This is for DRY; the class is used for creation and updating
 class PurchaseHeaderInline():
     form_class = PurchaseHeaderForm
     model = PurchaseHeader
@@ -166,12 +180,12 @@ class PurchaseHeaderInline():
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
-                formset_save_func(formset)
+                formset_save_func(formset) # executes formset_purchaselines_valid function below
             else:
                 formset.save()
         url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
-    
+    # custom save function for purchaselines formset
     def formset_purchaselines_valid(self, formset):
         purchaselines = formset.save(commit=False) 
         for obj in formset.deleted_objects:
@@ -227,7 +241,7 @@ class PurchaseHeaderReceivingInline():
         url = reverse_lazy('inventory:purchaseorder-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
-    def formset_purchaselines_valid(self, formset):
+    def formset_purchaselinesreceive_valid(self, formset):
         purchaselinesreceive = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
@@ -307,9 +321,6 @@ class SalesHeaderUpdateInline():
         if not all((x.is_valid() for x in named_formsets.values())):
             return self.render_to_response(self.get_context_data(form=form))
         self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
@@ -319,7 +330,7 @@ class SalesHeaderUpdateInline():
         url = reverse_lazy('inventory:invoice-detail', kwargs={'pk': str(self.object.pk)})
         return redirect(url)
     
-    def formset_saleslines_valid(self, formset):
+    def formset_saleslinesupdate_valid(self, formset):
         saleslinesupdate = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
@@ -363,21 +374,7 @@ class SalesInvoiceUpdate(LoginRequiredMixin, SalesHeaderUpdateInline, generic.ed
 
 class ApprovalListView(LoginRequiredMixin, generic.ListView):
     model = ApprovalEntry
-    paginate_by = 10
-
-# class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
-#     model = ApprovalEntry
-#     paginate_by =10
-
-#     # def get_context_data(self, **kwargs):
-#     #     context = super().get_context_data(**kwargs)
-        
-#     #     if self.object.status == '3':
-#     #         context['form'] = ApprovalEntryForm(instance=self.object)  # Create an instance of the form
-#     #     else:
-#     #         context['form'] = None
-
-#     #     return context
+    paginate_by = 30
 
 class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
     model = ApprovalEntry
@@ -388,18 +385,19 @@ class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
         context['messages'] = messages.get_messages(self.request)
         return context
     def post(self, request, pk):
-        try:
-            approval_entry = get_object_or_404(ApprovalEntry, pk=pk)
-        
+        approval_entry = ApprovalEntry.objects.filter(pk=pk).first()
+    
+        if approval_entry is not None:
             if 'action' in request.POST:
                 action = request.POST['action']
-            
+        
                 if action == 'approve':
                     approval_entry.status = 2
                     message = 'Approval entry approved'
                 elif action == 'reject':
                     approval_entry.status = 3
                     message = 'Approval entry rejected'
+                    return redirect('inventory:approval-update', pk=pk)
                 else:
                     messages.error(request, 'Invalid action')
                     return redirect('inventory:approval-detail', pk=pk)
@@ -410,13 +408,13 @@ class ApprovalDetailView(LoginRequiredMixin, generic.DetailView):
             else:
                 messages.error(request, 'Action parameter missing')
                 return redirect('inventory:approval-detail', pk=pk)
-        except:
+        else:
             messages.error(request, 'Error processing request')
             return redirect('inventory:approval-detail', pk=pk)
 
 class ApprovalUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = ApprovalEntry
-    fields = ['status']
+    fields = ['reason']
 
 class SalesCreditMemoListView(LoginRequiredMixin, generic.ListView):
     model = SalesCreditMemoHeader
@@ -630,7 +628,7 @@ def sales_pdf(request, pk):
     data = [['Item', 'Batch Number', 'Quantity', 'Unit Price', 'Discount', 'Line Amount']]
     sales_header = get_object_or_404(SalesHeader, pk=pk)
     # Fetch related sales lines
-    sales_lines = SalesLines.objects.filter(number=sales_header)
+    sales_lines = SalesLine.objects.filter(number=sales_header)
     for row in sales_lines:
         data.append([row.item, row.batch, row.quantity, row.unit_price, row.discount, row.total])
         # Create a list to hold the elements (text, image, and table)
@@ -730,7 +728,17 @@ class Echo:
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
+@require_POST
+def get_batch_numbers(request):
+    item_id = request.POST.get('item_id')  # Assuming you are using POST data
 
+    # Query your database to get batch numbers related to the selected item
+    batch_numbers = ItemEntry.objects.filter(item_entry=item_id).values_list('id', 'name')
+
+    # Convert queryset to a list of dictionaries
+    batch_numbers_list = [{'id': batch_id, 'name': batch_name} for batch_id, batch_name in batch_numbers]
+
+    return JsonResponse({'batch_numbers': batch_numbers_list})
 
 
 

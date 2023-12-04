@@ -6,7 +6,7 @@ admin.site.site_header = 'Chemist Administration'
 admin.site.index_title = 'Customization Interface'
 
 # Register your models here.
-from . models import (Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry,  SalesHeader, SalesLines, 
+from . models import (Unit, Item, Vendor, PurchaseHeader, PurchaseLine, ItemEntry,  SalesHeader, SalesLine, 
                       SalesCreditMemoHeader, SalesCreditMemoLine, ApprovalSetup, Profile)
 
 class UnitAdmin(admin.ModelAdmin):
@@ -77,11 +77,11 @@ class SalesLinesForm(forms.ModelForm):
         return cleaned_data
 
     class Meta:
-        model = SalesLines
+        model = SalesLine
         fields = '__all__'
 
 class SalesInline(admin.StackedInline):
-    model = SalesLines
+    model = SalesLine
     extra = 1
     form = SalesLinesForm
 @admin.register(SalesHeader)

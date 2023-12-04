@@ -3,12 +3,13 @@
     Purchase Orders
 {% endblock %}
 {% block content %}
+    <a href="{% url 'inventory:cancelled-documents'%}">Cancelled LPOs</a>
     <h1>List of Purchase Orders</h1>
     <a href="{% url 'inventory:purchaseorder-create' %}">Create Purchase Order</a>
     <ul>
         {% for lpo in purchaseheader_list %}
             {% if lpo.status != '3' %}
-            <li><a href="{% url 'inventory:purchaseorder-detail' lpo.number %}">{{lpo.number}}</a>&#124; {{lpo.vendor}}&#124; Ksh.{{lpo.total}}
+            <li><a href="{% url 'inventory:purchaseorder-detail' lpo.number %}">{{lpo.number}}</a>&#124; {{lpo.vendor}}&#124; Ksh.{{lpo.total}}&#124; {{lpo.status}}
             {% endif %}
         {% endfor %}
     </ul>
