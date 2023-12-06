@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'djang0_filters',
 ]
 
 MIDDLEWARE = [
