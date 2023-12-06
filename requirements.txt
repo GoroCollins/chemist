@@ -8,6 +8,7 @@ Django==4.2.7
 django-allauth==0.58.2
 django-crum==0.7.9
 django-environ==0.11.2
+django-filter==23.5
 django-phone-field==1.8.1
 environ==1.0
 idna==3.6
