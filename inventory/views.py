@@ -681,11 +681,11 @@ def purchases_pdf(request, pk):
     elements = []
 
     # Load and add an image to the top-right frame
-    image_path = '/home/goro/projects/inventory/inventweb/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
-    img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
-    img.hAlign = 'RIGHT'  # Align the image to the right within the frame
+    # image_path = '/home/goro/projects/inventory/inventweb/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
+    # img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
+    # img.hAlign = 'RIGHT'  # Align the image to the right within the frame
 
-    elements.append(img)
+    # elements.append(img)
 
     # Add information from SalesHeader above the table
     elements.append(Paragraph(f"Purchase Order Number: {purchase_header.number}", getSampleStyleSheet()["Title"]))
