@@ -26,6 +26,8 @@ from django.db.models import Sum
 import csv
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_POST
+from django_filters.views import FilterView
+from . filters import ItemFilter
 
 
 @login_required
@@ -92,6 +94,7 @@ class VendorUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
 class ItemListView(LoginRequiredMixin, generic.ListView):
     model = Item
     paginate_by = 25
+    filterset_class = ItemFilter
 
 class ItemDetailView(LoginRequiredMixin, generic.DetailView):
     model = Item
