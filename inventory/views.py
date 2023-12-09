@@ -91,10 +91,11 @@ class VendorUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Vendor
     fields = ['contact_email', 'contact_phone', 'address']
 
-class ItemListView(LoginRequiredMixin, generic.ListView):
+class ItemListView(LoginRequiredMixin, generic.ListView, FilterView):
     model = Item
     paginate_by = 25
     filterset_class = ItemFilter
+    template_name = 'inventory/item_list.html'
 
 class ItemDetailView(LoginRequiredMixin, generic.DetailView):
     model = Item
