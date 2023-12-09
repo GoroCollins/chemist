@@ -2,7 +2,7 @@ import django_filters
 
 from . models import Item
 
-from django.forms import forms
+from django import forms
 
 from django.contrib.auth.models import User
 

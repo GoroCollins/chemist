@@ -190,6 +190,8 @@ class Unit(models.Model):
     code = models.CharField('Unit of measure code',max_length=10, primary_key=True)
     description = models.CharField(max_length=200, verbose_name='Unit of Measure')
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='units', related_query_name='units')
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     def __str__(self) -> str:
         return self.description
     class Meta:
@@ -203,6 +205,8 @@ class Item(models.Model):
     description = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='Items', related_query_name='Items')
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='useritems', related_query_name='useritems')
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     def __str__(self) -> str:
         return self.description
     def get_absolute_url(self):
@@ -220,6 +224,8 @@ class Vendor(models.Model):
     address = models.CharField(max_length=200)
     kra_pin = models.CharField(max_length=30)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='vendors', related_query_name='vendors')
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     def __str__(self) -> str:
         return self.description
     def get_absolute_url(self):
@@ -271,6 +277,8 @@ class PurchaseLine(models.Model):
     quantity_received = models.PositiveIntegerField(default=0)
     markup = models.DecimalField(validators=[MaxValueValidator(100)], default=40, help_text="Percentage Markup", decimal_places=2, max_digits=6)
     invoice_no = models.CharField('Vendor Invoice Number',max_length=100, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def save(self, *args, **kwargs):
         if self.pk:
@@ -323,6 +331,7 @@ class PurchaseCreditMemoHeader(models.Model):
     date = models.DateField(auto_now=True)
     amount = models.PositiveBigIntegerField()
     created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='purchase_memo', related_query_name='purchase_memo',editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -350,6 +359,8 @@ class PurchaseCreditMemoLine(models.Model):
     quantity = models.PositiveIntegerField()
     total = models.PositiveIntegerField()
     item_entry = models.ForeignKey('ItemEntry', on_delete=models.PROTECT, related_name='purchase_return', related_query_name='purchase_return')
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self) -> str:
         return f'{self.number}'
@@ -372,7 +383,6 @@ class PurchaseCreditMemoLine(models.Model):
 
 @receiver(post_save, sender=PurchaseCreditMemoLine)
 def update_memo_total(sender, instance, created, **kwargs):
-    if created:
         purchase_memo = instance.number
         total_amount = purchase_memo.line.aggregate(total=Sum('total'))['total']
         purchase_memo.amount = total_amount or 0
@@ -390,6 +400,7 @@ class ItemEntry(models.Model):
     sale = models.DecimalField(decimal_places=2, max_digits=10)
     expiry_status = models.BooleanField(default=False)
     source_code = models.CharField(max_length=100)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     @property
     def is_expired(self):
@@ -422,6 +433,7 @@ class SalesHeader(models.Model):
     amount = models.FloatField(editable=False, default=0)
     finalize = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='sales', related_query_name='sales',editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     def save(self, *args, **kwargs):
         user = get_current_user()
         if user and not user.pk:
@@ -447,6 +459,8 @@ class SalesLine(models.Model):
     unit_price = models.DecimalField(editable=False, decimal_places=2, max_digits=10)
     total = models.DecimalField(editable=False, decimal_places=2, max_digits=10)
     discount = models.DecimalField(validators=[MaxValueValidator(100)], default=0, help_text="Allowed Precentage Discount", max_digits=6, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def save(self, *args, **kwargs):
         if not self.unit_price:
@@ -478,6 +492,7 @@ class SalesCreditMemoHeader(models.Model):
     invoice_no = models.ForeignKey(SalesLine, on_delete=models.PROTECT, related_name='credit_memo', related_query_name='credit_memo')
     amount = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey(User, blank=True, null=True, default=None, on_delete=models.PROTECT, related_name='memo', related_query_name='memo',editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def save(self, *args, **kwargs):
         user = get_current_user()
@@ -506,6 +521,8 @@ class SalesCreditMemoLine(models.Model):
     quantity = models.PositiveIntegerField()
     total = models.IntegerField(editable=False)
     item_entry = models.ForeignKey(ItemEntry, on_delete=models.PROTECT, related_name='sales_return', related_query_name='sales_return')
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
 
     def save(self, *args, **kwargs):
@@ -577,6 +594,8 @@ class ApprovalSetup(models.Model):
     approver = models.ForeignKey(User, on_delete=models.PROTECT, related_name='approver_id', related_query_name='approver_id')
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='creator_id', related_query_name='creator_id', editable=False)
     modified_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='modifier_id', related_query_name='modifier_id', editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         verbose_name_plural = 'Approvals Setup'
@@ -595,6 +614,8 @@ class Profile(models.Model):
     city = models.CharField(max_length=100, null= True)
     state = models.CharField(max_length=100, null= True)
     country = models.CharField(max_length=100, null= True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self) -> str:
         return f"{self.full_name}'s profile"
