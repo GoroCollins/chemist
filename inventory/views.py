@@ -26,6 +26,8 @@ from django.db.models import Sum
 import csv
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_POST
+from django_filters.views import FilterView
+from . filters import ItemFilter
 
 
 @login_required
@@ -89,9 +91,11 @@ class VendorUpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Vendor
     fields = ['contact_email', 'contact_phone', 'address']
 
-class ItemListView(LoginRequiredMixin, generic.ListView):
+class ItemListView(LoginRequiredMixin, generic.ListView, FilterView):
     model = Item
     paginate_by = 25
+    filterset_class = ItemFilter
+    template_name = 'inventory/item_list.html'
 
 class ItemDetailView(LoginRequiredMixin, generic.DetailView):
     model = Item
@@ -433,9 +437,6 @@ class SalesCreditMemoHeaderInline():
         if not all((x.is_valid() for x in named_formsets.values())):
             return self.render_to_response(self.get_context_data(form=form))
         self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
@@ -486,9 +487,6 @@ class PurchaseCreditMemoHeaderInline():
         if not all((x.is_valid() for x in named_formsets.values())):
             return self.render_to_response(self.get_context_data(form=form))
         self.object = form.save()
-
-        # for every formset, attempt to find a specific formset save function
-        # otherwise, just save.
         for name, formset in named_formsets.items():
             formset_save_func = getattr(self, 'formset_{0}_valid'.format(name), None)
             if formset_save_func is not None:
@@ -687,11 +685,11 @@ def purchases_pdf(request, pk):
     elements = []
 
     # Load and add an image to the top-right frame
-    image_path = '/home/goro/projects/inventory/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
-    img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
-    img.hAlign = 'RIGHT'  # Align the image to the right within the frame
+    # image_path = '/home/goro/projects/inventory/inventweb/chemist/inventory/static/inventory/images/mypic.png'  # Replace with the actual path to your image
+    # img = Image(image_path, width=200, height=100)  # Adjust width and height as needed
+    # img.hAlign = 'RIGHT'  # Align the image to the right within the frame
 
-    elements.append(img)
+    # elements.append(img)
 
     # Add information from SalesHeader above the table
     elements.append(Paragraph(f"Purchase Order Number: {purchase_header.number}", getSampleStyleSheet()["Title"]))
