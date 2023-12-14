@@ -7,8 +7,9 @@
     <h1>List of Items</h1>
     <a href="{% url 'inventory:item-add' %}">Create Item</a>
     <form method="get">
+        {% csrf_token %}
         <div class="input-group search">
-            {% render_field filter.form.description class="form-control textinput" placeholder="Search by stock name" %}
+            {% render_field filter.form.description class="form-control textinput" placeholder="Search by item name" %}
             <div class="input-group-append">
                <button type="submit" class="btn btn-pink"> Search </button>
             </div>
