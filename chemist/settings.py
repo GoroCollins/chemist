@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'django_filters',
     'widget_tweaks',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
